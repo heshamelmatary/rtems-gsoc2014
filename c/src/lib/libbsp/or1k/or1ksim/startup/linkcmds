@@ -1,0 +1,4 @@
+MEMORY
+  {
+      ram   : org = 0x10000000, l = 8M 
+  }
