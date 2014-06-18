@@ -21,8 +21,8 @@ bsp_processor_count = DEFINED (bsp_processor_count) ? bsp_processor_count : 1;
 
 MEMORY
   {
-      VECTOR_RAM     (AIW) : ORIGIN = 0x0       , LENGTH = 0x1FFF
-      RAM   : org = 0x00000000, l = 0x00800000
+      VECTOR_RAM     (AIW) : ORIGIN = 0x0       , LENGTH = 8192 
+      RAM   : org = 0x00002000, l = 0x00800000
       UNEXPECTED_SECTIONS : ORIGIN = 0xffffffff, LENGTH = 0
   }
 
@@ -46,10 +46,8 @@ REGION_ALIAS ("REGION_STACK", RAM);
 SECTIONS {
 
   .vector : ALIGN_WITH_INPUT {
-
-    . = 0;
-    . = . + DEFINED (bsp_vector_table_in_start_section) ? 0 : bsp_vector_table_size;
-
+    *(.vector)
+    . = ALIGN(bsp_vector_table_size);
     bsp_section_vector_end = .;
   } > REGION_VECTOR AT > REGION_VECTOR
   bsp_section_vector_size = bsp_section_vector_end - bsp_section_vector_begin;
@@ -151,7 +149,7 @@ SECTIONS {
   } > REGION_STACK AT > REGION_STACK
   /* FIXME: Currently RAM memory size is 128 */
   bsp_section_stack_begin = 0x18000000;
-  bsp_section_stack_size = bsp_section_stack_end - bsp_section_stack_begin;
+  bsp_section_stack_size = bsp_section_stack_begin - bsp_section_stack_end;
 
   /* FIXME */
   RamBase = ORIGIN (REGION_WORK);
@@ -159,13 +157,4 @@ SECTIONS {
   WorkAreaBase = bsp_section_work_begin;
   HeapSize = 0;
 
-/*
- * This is a RTEMS specific section to catch all unexpected input
- * sections.  In case you get an error like
- *   "section `.unexpected_sections' will not fit in region
- *   `UNEXPECTED_SECTIONS'"
- * you have to figure out the offending input section and add it to the
- * appropriate output section definition above.
- */
-  .unexpected_sections : { *(*) } > UNEXPECTED_SECTIONS
 }
