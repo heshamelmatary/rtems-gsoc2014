@@ -1,56 +1,25 @@
-.file "start.S"
+#include <bsp/linker-symbols.h>
 
   .extern bsp_start
+  .extern bsp_section_bss_begin
+  .extern bsp_section_bss_end
+
+  .extern  bsp_start_vector_table_begin
+  .extern  bsp_start_vector_table_end
+  .extern  bsp_start_vector_table_size
+  .extern  bsp_vector_table_size
+  .extern  bsp_section_stack_begin 
 
   /* Global symbols */
   .globl  _start
-  .globl  bsp_start_vector_table_begin
-  .globl  bsp_start_vector_table_end
-  .globl  bsp_start_vector_table_size
-  .globl  bsp_vector_table_size
-  .global bsp_section_stack_begin 
-
 
 /* Popualte vector table */
 
-.section .text, "ax"
+.section .vector, "ax"
 
-bsp_start_vector_table_begin:
 .org 0x100
+bsp_start_vector_table_begin:
 _reset:
-  l.movhi	r0,0
-	l.movhi	r1,0
-	l.movhi	r2,0
-	l.movhi	r3,0
-	l.movhi	r4,0
-	l.movhi	r5,0
-	l.movhi	r6,0
-	l.movhi	r7,0
-	l.movhi	r8,0
-	l.movhi	r9,0
-	l.movhi	r10,0
-	l.movhi	r11,0
-	l.movhi	r12,0
-	l.movhi	r13,0
-	l.movhi	r14,0
-	l.movhi	r15,0
-	l.movhi	r16,0
-	l.movhi	r17,0
-	l.movhi	r18,0
-	l.movhi	r19,0
-	l.movhi	r20,0
-	l.movhi	r21,0
-	l.movhi	r22,0
-	l.movhi	r23,0
-	l.movhi	r24,0
-	l.movhi	r25,0
-	l.movhi	r26,0
-	l.movhi	r27,0
-	l.movhi	r28,0
-	l.movhi	r29,0
-	l.movhi	r30,0
-	l.movhi	r31,0
-
   l.ori	r1,r0,0x1
   l.mtspr	r0,r1,17
   l.movhi  r4,hi(_start)
@@ -215,10 +184,24 @@ bsp_start_vector_table_end:
   .section  ".bsp_start_text", "ax"
 _start:
 /* load stack and frame pointers */
-  l.movhi r1,hi(0x18000000)
-  l.ori   r1,r1,lo(0x18000000)
+  l.movhi r1,hi(bsp_section_stack_begin)
   l.add   r2,r0,r1 
   
+/* Clearing .bss */
+  l.movhi r13,hi(bsp_section_bss_begin)
+  l.ori   r13,r13,lo(bsp_section_bss_begin)
+  l.movhi r15,hi(bsp_section_bss_end)
+  l.ori   r15,r15,lo(bsp_section_bss_end)
+
+_loop_clear_bss:
+  l.sfgeu r13,r15
+  l.bf    _end_clear_bss
+  l.addi  r13,r13,4
+  l.sw    0(r13), r0
+  l.j     _loop_clear_bss
+  l.nop
+_end_clear_bss:
+
   l.j bsp_start 
   l.nop
 
@@ -232,6 +215,3 @@ unhandled_exception:
   l.j unhandled_exception
   l.nop
 
- .set  bsp_section_stack_begin, 0x18000000
- .set  bsp_start_vector_table_size, bsp_start_vector_table_end - bsp_start_vector_table_begin
- .set  bsp_vector_table_size, bsp_start_vector_table_size
