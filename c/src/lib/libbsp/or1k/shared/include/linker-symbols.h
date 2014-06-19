@@ -6,9 +6,9 @@ extern "C" {
 #endif /* __cplusplus */
 
 /**
- * @defgroup arm_linker Linker Support
+ * @defgroup or1k_linker Linker Support
  *
- * @ingroup arm_shared
+ * @ingroup or1k_shared
  *
  * @brief Linker support.
  *
