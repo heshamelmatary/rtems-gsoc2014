@@ -32,6 +32,7 @@ include_bsp_HEADERS += ../../shared/include/irq-info.h
 include_bsp_HEADERS += ../../shared/include/stackalloc.h
 include_bsp_HEADERS += ../../shared/include/uart-output-char.h
 include_bsp_HEADERS += ../../shared/tod.h
+include_bsp_HEADERS += include/irq.h
 include_bsp_HEADERS += include/uart.h
 include_bsp_HEADERS += include/or1ksim.h
 
@@ -86,6 +87,9 @@ libbsp_a_SOURCES += ../../shared/console_select.c
 libbsp_a_SOURCES += ../../shared/console_write.c
 libbsp_a_SOURCES += console/console-config.c
 libbsp_a_SOURCES += console/uart.c
+
+# clock
+libbsp_a_SOURCES += clock/clockdrv.c ../../../shared/clockdrv_shell.h
 
 ###############################################################################
 #                  Special Rules                                              #

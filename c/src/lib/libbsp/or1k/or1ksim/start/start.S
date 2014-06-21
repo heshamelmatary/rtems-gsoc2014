@@ -1,6 +1,7 @@
 #include <bsp/linker-symbols.h>
 
   .extern bsp_start
+  .extern boot_card
   .extern bsp_section_bss_begin
   .extern bsp_section_bss_end
 
@@ -9,6 +10,8 @@
   .extern  bsp_start_vector_table_size
   .extern  bsp_vector_table_size
   .extern  bsp_section_stack_begin 
+
+  .extern rtems_clock_tick
 
   /* Global symbols */
   .globl  _start
@@ -45,14 +48,17 @@ _iPageFaule:
 
 .org 0x500
 _timer:
-  l.j  unhandled_exception
+  l.movhi r13,hi(rtems_clock_tick)
+  l.ori   r13,r13,lo(rtems_clock_tick)
+  l.jalr  r13
+  l.rfe
   l.nop
 
-.org 0x600
+/*.org 0x600
 _misaligned:
   l.j  unhandled_exception
   l.nop
-
+*/
 .org 0x700
 _undefIns:
   l.j  unhandled_exception
@@ -202,7 +208,7 @@ _loop_clear_bss:
   l.nop
 _end_clear_bss:
 
-  l.j bsp_start 
+  l.j boot_card
   l.nop
 
 

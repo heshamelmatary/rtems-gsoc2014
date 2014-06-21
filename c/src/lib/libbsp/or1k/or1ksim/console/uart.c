@@ -19,7 +19,7 @@
 #include <libchip/sersupp.h>
 #include <bsp/or1ksim.h>
 #include <bsp.h>
-//#include <bsp/irq.h>
+#include <bsp/irq.h>
 #include <bsp/uart.h>
 
 static void uart_delay(uint32_t n)
@@ -58,14 +58,14 @@ static void uart_set_baud(int baud)
 
 static void uart_initialize(int minor)
 {
+  // Disable all interrupts
+  OR1KSIM_REG(OR1KSIM_BSP_UART_REG_INT_ENABLE) = 0x00;
+  
    OR1KSIM_REG(OR1KSIM_BSP_UART_REG_FIFO_CTRL) =   
      OR1KSIM_BSP_UART_REG_FIFO_CTRL_ENABLE_FIFO |
      OR1KSIM_BSP_UART_REG_FIFO_CTRL_CLEAR_RCVR  |
      OR1KSIM_BSP_UART_REG_FIFO_CTRL_CLEAR_XMIT  |
      OR1KSIM_BSP_UART_REG_FIFO_CTRL_TRIGGER_14;
-
-  // Disable all interrupts
-  OR1KSIM_REG(OR1KSIM_BSP_UART_REG_INT_ENABLE) = 0x00;
 
   // Reset receiver and transmitter 
   OR1KSIM_REG(OR1KSIM_BSP_UART_REG_FIFO_CTRL) = 
