@@ -1,5 +1,4 @@
 #ifndef LIBBSP_OR1K_OR1KSIM_H
 #define LIBBSP_OR1K_OR1KSIM_H
 
-
 #endif /* LIBBSP_OR1K_OR1KSIM_H */

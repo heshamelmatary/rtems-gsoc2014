@@ -39,7 +39,7 @@
  * @{
  */
  
- #define OR1KSIM_REG(x)           (*(volatile uint32_t *)(x))
+ #define OR1KSIM_REG(x)           (*((volatile char *) (x)))
  #define OR1KSIM_BIT(n)           (1 << (n))
 
 /** @} */
@@ -96,21 +96,6 @@
 #define OR1KSIM_BSP_UART_REG_LINE_STATUS_PE   (0x04)
 #define OR1KSIM_BSP_UART_REG_LINE_STATUS_OE   (0x02)
 #define OR1KSIM_BSP_UART_REG_LINE_STATUS_DR   (0x01)
-
-// Interrupt Identification Register
-#define OR1KSIM_BSP_UART_REG_INT_ID_NO_INT (0x01)
-#define OR1KSIM_BSP_UART_REG_INT_ID_ID     (0x06)
-#define OR1KSIM_BSP_UART_REG_INT_ID_MSI    (0x00)
-#define OR1KSIM_BSP_UART_REG_INT_ID_THRI   (0x02)
-#define OR1KSIM_BSP_UART_REG_INT_ID_TOI    (0x0c)
-#define OR1KSIM_BSP_UART_REG_INT_ID_RDI    (0x04)
-#define OR1KSIM_BSP_UART_REG_INT_ID_RLSI   (0x06)
-
-// Interrupt Enable Register
-#define OR1KSIM_BSP_UART_REG_INT_ENABLE_MSI  (0x08)
-#define OR1KSIM_BSP_UART_REG_INT_ENABLE_RLSI (0x04)
-#define OR1KSIM_BSP_UART_REG_INT_ENABLE_THRI (0x02)
-#define OR1KSIM_BSP_UART_REG_INT_ENABLE_RDI  (0x01)
 
 // Modem Control Register
 #define OR1KSIM_BSP_UART_REG_MODEM_CTRL_LOOP (0x10)
