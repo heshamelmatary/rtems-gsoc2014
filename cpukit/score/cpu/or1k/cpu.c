@@ -99,7 +99,7 @@ void _CPU_ISR_install_raw_handler(
   register uint32_t   tmp;
   extern uint32_t   Or1k_Interrupt_Vectors[];
 
-/*  asm volatile ("l.mfspr %0,r0,0x11\n\t"
+ /* asm volatile ("l.mfspr %0,r0,0x11\n\t"
 	       "l.addi  %1,r0,-5\n\t"
 	       "l.and   %1,%1,%0\n\t": "=r" (sr) : "r" (tmp));
   *old_handler = *((proc_ptr*)&Or1k_Interrupt_Vectors[vector]);

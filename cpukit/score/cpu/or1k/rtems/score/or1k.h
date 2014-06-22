@@ -3,24 +3,21 @@
  */
 
 /*
- *  This include file contains Or1k definitions pertaining to the Opencores
- *  or1k processor family.
+ *  This file contains information pertaining to the OR1K processor.
  *
- *  COPYRIGHT (c) 1989-1999.
+ *  COPYRIGHT (c) 2014 Hesham ALMatary
+ *
+ *  Based on code with the following copyright...
+ *  COPYRIGHT (c) 1989-1999, 2010.
  *  On-Line Applications Research Corporation (OAR).
  *
  *  The license and distribution terms for this file may be
  *  found in the file LICENSE in this distribution or at
- *  http://www.rtems.com/license/LICENSE.
- *
- *  This file adapted from no_cpu example of the RTEMS distribution.
- *  The body has been modified for the Opencores Or1k implementation by
- *  Chris Ziomkowski. <chris@asics.ws>
- *
+ *  http://www.rtems.org/license/LICENSE.
  */
-
-#ifndef _OR1K_H
-#define _OR1K_H
+ 
+#ifndef _RTEMS_SCORE_OR1K_H
+#define _RTEMS_SCORE_OR1K_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,7 +25,7 @@ extern "C" {
 
 /*
  *  This file contains the information required to build
- *  RTEMS for a particular member of the or1k CPU family.
+ *  RTEMS for a particular member of the OR1K family.
  *  It does this by setting variables to indicate which
  *  implementation dependent features are present in a particular
  *  member of the family.
@@ -38,35 +35,15 @@ extern "C" {
  *  to.
  */
  
-#if defined(rtems_multilib)
-/*
- *  Figure out all CPU Model Feature Flags based upon compiler 
- *  predefines. 
+ /*
+ *  Define the name of the CPU family and specific model.
  */
 
-#define CPU_MODEL_NAME  "rtems_multilib"
-#define OR1K_HAS_FPU     1
-
-#elif defined(or1200)
- 
-#define CPU_MODEL_NAME  "OR1200"
-#define OR1K_HAS_FPU     0
- 
-#else
- 
-#define CPU_MODEL_NAME "Generic Or1k Compatible"
-#define OR1K_HAS_FPU    0
- 
-#endif
-
-/*
- *  Define the name of the CPU family.
- */
-
-#define CPU_NAME "OpenRisc 1000"
+#define CPU_NAME "OR1K"
+#define CPU_MODEL_NAME "OR1200"
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* ! _INCLUDE_NO_CPU_h */
+#endif /* _RTEMS_SCORE_OR1K_H */

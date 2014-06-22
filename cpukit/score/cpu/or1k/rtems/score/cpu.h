@@ -6,6 +6,7 @@
  *  This include file contains macros pertaining to the Opencores
  *  or1k processor family.
  *
+ *  COPYRIGHT (c) 2014 Hesham ALMatary
  *  COPYRIGHT (c) 1989-1999.
  *  On-Line Applications Research Corporation (OAR).
  *
@@ -14,13 +15,13 @@
  *  http://www.rtems.com/license/LICENSE.
  *
  *  This file adapted from no_cpu example of the RTEMS distribution.
- *  The body has been modified for the Opencores Or1k implementation by
+ *  The body has been modified for the Opencores OR1k implementation by
  *  Chris Ziomkowski. <chris@asics.ws>
  *
  */
 
-#ifndef _OR1K_CPU_h
-#define _OR1K_CPU_h
+#ifndef _OR1K_CPU_H
+#define _OR1K_CPU_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -274,7 +275,7 @@ extern "C" {
  *  If TRUE, then the grows upward.
  *  If FALSE, then the grows toward smaller addresses.
  *
- *  Or1k Specific Information:
+ *  OR1k Specific Information:
  *  
  *  Previously I had misread the documentation and set this
  *  to true. Surprisingly, it seemed to work anyway. I'm
@@ -381,91 +382,43 @@ extern "C" {
 #define or1kreg uint32_t  
 #endif
 
-/* SR_MASK is the mask of values that will be copied to/from the status
-   register on a context switch. Some values, like the flag state, are
-   specific on the context, while others, such as interrupt enables,
-   are global. The currently defined global bits are:
-
-   0x00001 SUPV:     Supervisor mode
-   0x00002 EXR:      Exceptions on/off
-   0x00004 EIR:      Interrupts enabled/disabled
-   0x00008 DCE:      Data cache enabled/disabled
-   0x00010 ICE:      Instruction cache enabled/disabled
-   0x00020 DME:      Data MMU enabled/disabled
-   0x00040 IME:      Instruction MMU enabled/disabled
-   0x00080 LEE:      Little/Big Endian enable
-   0x00100 CE:       Context ID/shadow regs enabled/disabled
-   0x01000 OVE:      Overflow causes exception
-   0x04000 EP:       Exceptions @ 0x0 or 0xF0000000
-   0x08000 PXR:      Partial exception recognition enabled/disabled
-   0x10000 SUMRA:    SPR's accessible/inaccessible
-
-   The context specific bits are:
-
-   0x00200 F         Branch flag indicator
-   0x00400 CY        Carry flag indicator
-   0x00800 OV        Overflow flag indicator
-   0x02000 DSX       Delay slot exception occurred
-   0xF8000000 CID    Current Context ID
-*/
-
-#define SR_MASK 0xF8002E00
-
-typedef enum {
-  SR_SUPV = 0x00001,
-  SR_EXR = 0x00002,
-  SR_EIR = 0x00004,
-  SR_DCE = 0x00008,
-  SR_ICE = 0x00010,
-  SR_DME = 0x00020,
-  SR_IME = 0x00040,
-  SR_LEE = 0x00080,
-  SR_CE = 0x00100,
-  SR_F = 0x00200,
-  SR_CY = 0x00400,
-  SR_OV = 0x00800,
-  SR_OVE = 0x01000,
-  SR_DSX = 0x02000,
-  SR_EP = 0x04000,
-  SR_PXR = 0x08000,
-  SR_SUMRA = 0x10000,
-  SR_CID = 0xF8000000,
-} StatusRegisterBits;
-
 typedef struct {
-  uint32_t    sr;     /* Current status register non persistent values */
-  uint32_t    esr;    /* Saved exception status register */
-  uint32_t    ear;    /* Saved exception effective address register */
-  uint32_t    epc;    /* Saved exception PC register    */
-  or1kreg     r[31];  /* Registers */
-  or1kreg     pc;     /* Context PC 4 or 8 bytes for 64 bit alignment */
+  uint32_t  sr;     /* Current status register non persistent values */
+  uint32_t  esr;    /* Saved exception status register */
+  uint32_t  ear;    /* Saved exception effective address register */
+  uint32_t  epc;    /* Saved exception PC register    */
+  uint32_t  pc;     /* Context PC 4 or 8 bytes for 64 bit alignment */
+  
+  uint32_t  sp;     /* Stack pointer */
+  uint32_t  fp;     /* Frame pointer */
+  uint32_t  lr;     /* Link address register */  
+  
+  /* Callee-Saved registers */
+  uint32_t  r10;
+  uint32_t  r14;
+  uint32_t  r16;
+  uint32_t  r18;
+  uint32_t  r20;
+  uint32_t  r22;
+  uint32_t  r24;
+  uint32_t  r26;
+  uint32_t  r28;
+  uint32_t  r30;
+  
 } Context_Control;
 
-typedef int Context_Control_fp;
+#define _CPU_Context_Get_SP( _context ) \
+  (_context)->sp
+  
+typedef void Context_Control_fp;
 typedef Context_Control CPU_Interrupt_frame;
-#define _CPU_Null_fp_context 0
-#define _CPU_Interrupt_stack_low 0
-#define _CPU_Interrupt_stack_high 0
+
 
 /*
  *  The following table contains the information required to configure
  *  the XXX processor specific parameters.
  *
  */
-
-typedef struct {
-  void       (*pretasking_hook)( void );
-  void       (*predriver_hook)( void );
-  void       (*postdriver_hook)( void );
-  void       (*idle_task)( void );
-  boolean      do_zero_of_workspace;
-  uint32_t     idle_task_stack_size;
-  uint32_t     interrupt_stack_size;
-  uint32_t     extra_mpci_receive_server_stack;
-  void *     (*stack_allocate_hook)( uint32_t   );
-  void       (*stack_free_hook)( void* );
-  /* end of fields required on all CPUs */
-}   rtems_cpu_table;
 
 /*
  *  Macros to access required entires in the CPU Table are in 
@@ -488,39 +441,8 @@ typedef struct {
  *
  */
 
-/* SCORE_EXTERN Context_Control_fp  _CPU_Null_fp_context; */
+SCORE_EXTERN Context_Control_fp  _CPU_Null_fp_context; 
 
-/*
- *  On some CPUs, RTEMS supports a software managed interrupt stack.
- *  This stack is allocated by the Interrupt Manager and the switch
- *  is performed in _ISR_Handler.  These variables contain pointers
- *  to the lowest and highest addresses in the chunk of memory allocated
- *  for the interrupt stack.  Since it is unknown whether the stack
- *  grows up or down (in general), this give the CPU dependent
- *  code the option of picking the version it wants to use.
- *
- *  NOTE: These two variables are required if the macro
- *        CPU_HAS_SOFTWARE_INTERRUPT_STACK is defined as TRUE.
- *
- */
-
-/*
-SCORE_EXTERN void               *_CPU_Interrupt_stack_low;
-SCORE_EXTERN void               *_CPU_Interrupt_stack_high;
-*/
-
-/*
- *  With some compilation systems, it is difficult if not impossible to
- *  call a high-level language routine from assembly language.  This
- *  is especially true of commercial Ada compilers and name mangling
- *  C++ ones.  This variable can be optionally defined by the CPU porter
- *  and contains the address of the routine _Thread_Dispatch.  This
- *  can make it easier to invoke that routine at the end of the interrupt
- *  sequence (if a dispatch is necessary).
- *
- */
-
-extern void           (*_CPU_Thread_dispatch_pointer)();
 
 /*
  *  Nothing prevents the porter from declaring more CPU specific variables.
@@ -537,10 +459,9 @@ extern void           (*_CPU_Thread_dispatch_pointer)();
  *
  *  Or1k Specific Information:
  *
- *  We don't support floating point in this version, so the size is 0
  */
 
-#define CPU_CONTEXT_FP_SIZE 0
+#define CPU_CONTEXT_FP_SIZE sizeof( Context_Control_fp )
 
 /*
  *  Amount of extra stack (above minimum stack size) required by
@@ -557,7 +478,7 @@ extern void           (*_CPU_Thread_dispatch_pointer)();
  *
  */
 
-#define CPU_INTERRUPT_NUMBER_OF_VECTORS      16
+#define CPU_INTERRUPT_NUMBER_OF_VECTORS  16
 #define CPU_INTERRUPT_MAXIMUM_VECTOR_NUMBER  (CPU_INTERRUPT_NUMBER_OF_VECTORS - 1)
 
 /*
@@ -566,7 +487,7 @@ extern void           (*_CPU_Thread_dispatch_pointer)();
  *
  */
 
-#define CPU_STACK_MINIMUM_SIZE          4096
+#define CPU_STACK_MINIMUM_SIZE  4096
 
 /*
  *  CPU's worst alignment requirement for data types on a byte boundary.  This
@@ -574,7 +495,22 @@ extern void           (*_CPU_Thread_dispatch_pointer)();
  *
  */
 
-#define CPU_ALIGNMENT              8
+#define CPU_ALIGNMENT  8
+
+/*
+ *  This is defined if the port has a special way to report the ISR nesting
+ *  level.  Most ports maintain the variable _ISR_Nest_level.
+ */
+#define CPU_PROVIDES_ISR_IS_IN_PROGRESS FALSE
+
+/**
+ * Size of a pointer.
+ *
+ * This must be an integer literal that can be used by the assembler.  This
+ * value will be used to calculate offsets of structure members.  These
+ * offsets will be used in assembler code.
+ */
+#define CPU_SIZEOF_POINTER         4
 
 /*
  *  This number corresponds to the byte alignment requirement for the
@@ -783,8 +719,8 @@ uint32_t   _CPU_ISR_Get_level( void );
  */
 
 #define _CPU_Fatal_halt( _error ) \
-  { \
-  }
+        printk("Fatal Error %d Halted\n",_error); \
+        for(;;)
 
 /* end of Fatal Error manager macros */
 
@@ -943,6 +879,12 @@ typedef struct {
   uint32_t register_r31;
 } CPU_Exception_frame;
 
+/**
+ * @brief Prints the exception frame via printk().
+ *
+ * @see rtems_fatal() and RTEMS_FATAL_SOURCE_EXCEPTION.
+ */
+void _CPU_Exception_frame_print( const CPU_Exception_frame *frame );
 
 /* end of Priority handler macros */
 
@@ -1099,6 +1041,16 @@ static inline unsigned int CPU_swap_u32(
  
   swapped = (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
   return( swapped );
+}
+
+CPU_Counter_ticks _CPU_Counter_read( void );
+
+static inline CPU_Counter_ticks _CPU_Counter_difference(
+  CPU_Counter_ticks second,
+  CPU_Counter_ticks first
+)
+{
+  return second - first;
 }
 
 #define CPU_swap_u16( value ) \
