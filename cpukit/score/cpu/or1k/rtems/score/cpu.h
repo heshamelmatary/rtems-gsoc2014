@@ -383,32 +383,44 @@ extern "C" {
 #endif
 
 typedef struct {
-  uint32_t  sr;     /* Current status register non persistent values */
-  uint32_t  esr;    /* Saved exception status register */
-  uint32_t  ear;    /* Saved exception effective address register */
-  uint32_t  epc;    /* Saved exception PC register    */
-  uint32_t  pc;     /* Context PC 4 or 8 bytes for 64 bit alignment */
-  
-  uint32_t  sp;     /* Stack pointer */
-  uint32_t  fp;     /* Frame pointer */
-  uint32_t  lr;     /* Link address register */  
-  
-  /* Callee-Saved registers */
+  uint32_t  r1;     /* Stack pointer */
+  uint32_t  r2;     /* Frame pointer */
+  uint32_t  r3;
+  uint32_t  r4;
+  uint32_t  r5;
+  uint32_t  r6;
+  uint32_t  r7;
+  uint32_t  r8;
+  uint32_t  r9;
   uint32_t  r10;
+  uint32_t  r11;
+  uint32_t  r12;
+  uint32_t  r13;
   uint32_t  r14;
+  uint32_t  r15;
   uint32_t  r16;
+  uint32_t  r17;
   uint32_t  r18;
+  uint32_t  r19;
   uint32_t  r20;
+  uint32_t  r21;
   uint32_t  r22;
+  uint32_t  r23;
   uint32_t  r24;
+  uint32_t  r25;
   uint32_t  r26;
+  uint32_t  r27;
   uint32_t  r28;
+  uint32_t  r29;
   uint32_t  r30;
+  uint32_t  r31;
+  
+  uint32_t  sr;     /* Current supervision register non persistent values */
   
 } Context_Control;
 
 #define _CPU_Context_Get_SP( _context ) \
-  (_context)->sp
+  (_context)->r1
   
 typedef void Context_Control_fp;
 typedef Context_Control CPU_Interrupt_frame;
@@ -419,6 +431,34 @@ typedef Context_Control CPU_Interrupt_frame;
  *  the XXX processor specific parameters.
  *
  */
+
+/**
+ * @brief Supervision Mode registers definitions.
+ *
+ * @see OpenRISC architecture manual - revision 0.
+ */
+ 
+/* Supervision Mode Register */
+#define CPU_OR1K_SR  17
+
+#define CPU_OR1K_SR_SM    0x1       /* Supervisor Mode */ 
+#define CPU_OR1K_SR_TEE   0x2       /* Tick Timer Exception Enabled */
+#define CPU_OR1K_SR_IEE   0x4       /* Interrupt Exception Enabled */
+#define CPU_OR1K_SR_DCE   0x8       /* Data Cache Enable */
+#define CPU_OR1K_SR_ICE   0x10      /* Instruction Cache Enable */
+#define CPU_OR1K_SR_DME   0x20      /* Data MMU Enable */
+#define CPU_OR1K_SR_IME   0x40      /* Instruction MMU Enable */
+#define CPU_OR1K_SR_LEE   0x80      /* Little Endian Enable */
+#define CPU_OR1K_SR_CE    0x100     /* CID Enable */
+#define CPU_OR1K_SR_F     0x200     /* Conditional branch flag */
+#define CPU_OR1K_SR_CY    0x400     /* Carry flag */
+#define CPU_OR1K_SR_OV    0x800     /* Overflow flag */
+#define CPU_OR1K_SR_OVE   0x1000    /* Overflow flag Exception */
+#define CPU_OR1K_SR_DSX   0x2000    /* Delay Slot Exception */
+#define CPU_OR1K_SR_EPH   0x4000    /* Exception Prefix High */
+#define CPU_OR1K_SR_FO    0x8000    /* Fixed One */
+#define CPU_OR1K_SR_SUMRA 0x10000   /* SPRs User Mode Read Access */
+#define CPU_OR1K_SR_CID   0xF0000000 /*Context ID (Fast Context Switching */
 
 /*
  *  Macros to access required entires in the CPU Table are in 
@@ -441,7 +481,7 @@ typedef Context_Control CPU_Interrupt_frame;
  *
  */
 
-SCORE_EXTERN Context_Control_fp  _CPU_Null_fp_context; 
+/*SCORE_EXTERN Context_Control_fp  _CPU_Null_fp_context;*/ 
 
 
 /*
@@ -461,7 +501,7 @@ SCORE_EXTERN Context_Control_fp  _CPU_Null_fp_context;
  *
  */
 
-#define CPU_CONTEXT_FP_SIZE sizeof( Context_Control_fp )
+#define CPU_CONTEXT_FP_SIZE  0
 
 /*
  *  Amount of extra stack (above minimum stack size) required by
@@ -655,8 +695,33 @@ uint32_t   _CPU_ISR_Get_level( void );
  *
  */
 
-#define _CPU_Context_Initialize( _the_context, _stack_base, _size, \
-                                   _isr, _entry_point, _is_fp, _tls_area ) \
+/**
+ * @brief Initializes the CPU context.
+ *
+ * The following steps are performed:
+ *  - setting a starting address
+ *  - preparing the stack
+ *  - preparing the stack and frame pointers
+ *  - setting the proper interrupt level in the context
+ *
+ * @param[in] context points to the context area
+ * @param[in] stack_area_begin is the low address of the allocated stack area
+ * @param[in] stack_area_size is the size of the stack area in bytes
+ * @param[in] new_level is the interrupt level for the task
+ * @param[in] entry_point is the task's entry point
+ * @param[in] is_fp is set to @c true if the task is a floating point task
+ * @param[in] tls_area is the thread-local storage (TLS) area
+ */
+void _CPU_Context_Initialize(
+  Context_Control *context,
+  void *stack_area_begin,
+  size_t stack_area_size,
+  uint32_t new_level,
+  void (*entry_point)( void ),
+  bool is_fp,
+  void *tls_area
+);
+
 /*
  *  This routine is responsible for somehow restarting the currently
  *  executing task.  If you are lucky, then all that is necessary
@@ -702,11 +767,11 @@ uint32_t   _CPU_ISR_Get_level( void );
  *
  */
 
-#define _CPU_Context_Initialize_fp( _destination ) \
+/*#define _CPU_Context_Initialize_fp( _destination ) \
   { \
-   *((Context_Control_fp *) *((void **) _destination)) = _CPU_Null_fp_context; \
+   *(*(_destination)) = _CPU_Null_fp_context; \
   }
-
+*/
 /* end of Context handler macros */
 
 /* Fatal Error manager macros */
@@ -1043,15 +1108,7 @@ static inline unsigned int CPU_swap_u32(
   return( swapped );
 }
 
-CPU_Counter_ticks _CPU_Counter_read( void );
-
-static inline CPU_Counter_ticks _CPU_Counter_difference(
-  CPU_Counter_ticks second,
-  CPU_Counter_ticks first
-)
-{
-  return second - first;
-}
+typedef uint32_t CPU_Counter_ticks;
 
 #define CPU_swap_u16( value ) \
   (((value&0xff) << 8) | ((value >> 8)&0xff))

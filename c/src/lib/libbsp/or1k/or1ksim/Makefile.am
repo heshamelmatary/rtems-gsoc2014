@@ -91,6 +91,8 @@ libbsp_a_SOURCES += console/uart.c
 # clock
 libbsp_a_SOURCES += clock/clockdrv.c ../../../shared/clockdrv_shell.h
 
+# IRQ
+libbsp_a_SOURCES += irq/irq.c
 ###############################################################################
 #                  Special Rules                                              #
 ###############################################################################

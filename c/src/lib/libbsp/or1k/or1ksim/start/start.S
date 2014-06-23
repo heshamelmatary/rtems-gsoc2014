@@ -12,6 +12,9 @@
   .extern  bsp_section_stack_begin 
 
   .extern rtems_clock_tick
+  .extern _exit
+  .extern printk
+  .extern bsp_interrupt_handler_default
 
   /* Global symbols */
   .globl  _start
@@ -33,27 +36,34 @@ _reset:
 
 .org 0x200
 _buserr:
-  l.j  unhandled_exception
+  l.addi r1,r0,0x200
+  l.jal  bsp_interrupt_handler_default
   l.nop
 
 .org 0x300
 _dPageFault:
-  l.j  unhandled_exception
+  l.addi r1,r0,0x300
+  l.jal  bsp_interrupt_handler_default
   l.nop
 
 .org 0x400
 _iPageFaule:
-  l.j  unhandled_exception
-  l.nop
 
+  l.addi r1,r0,0x400
+  l.jal  bsp_interrupt_handler_default
+  l.nop
 .org 0x500
 _timer:
+  l.addi r1,r0,0x500
+  l.jal  bsp_interrupt_handler_default
+  l.nop
+  /*
   l.movhi r13,hi(rtems_clock_tick)
   l.ori   r13,r13,lo(rtems_clock_tick)
   l.jalr  r13
   l.rfe
   l.nop
-
+  */
 /*.org 0x600
 _misaligned:
   l.j  unhandled_exception
@@ -61,42 +71,50 @@ _misaligned:
 */
 .org 0x700
 _undefIns:
-  l.j  unhandled_exception
+  l.addi r1,r0,0700
+  l.jal  bsp_interrupt_handler_default
   l.nop
 
 .org 0x800
 _exInt:
-  l.j  unhandled_exception
+  l.addi r1,r0,0x800
+  l.jal  bsp_interrupt_handler_default
   l.nop
 
 .org 0x900
 _dTLB:
-  l.j  unhandled_exception
+  l.addi r1,r0,0x900
+  l.jal  bsp_interrupt_handler_default
   l.nop
 
 .org 0xA00
 _iTLB:
-  l.j  unhandled_exception
+  l.addi r1,r0,0xA00
+  l.jal  bsp_interrupt_handler_default
   l.nop
 
 .org 0xB00
 _range:
-  l.j  unhandled_exception
+  l.addi r1,r0,0xB00
+  l.jal  bsp_interrupt_handler_default
   l.nop
 
 .org 0xC00
 _syscall:
-  l.j  unhandled_exception
+  l.addi r1,r0,0xC00
+  l.jal  bsp_interrupt_handler_default
   l.nop
 
 .org 0xD00
 _fp:
-  l.j  unhandled_exception
+  l.addi r1,r0,0xD00
+  l.jal  bsp_interrupt_handler_default
   l.nop
 
 .org 0xE00
 _trap:
-  l.j  unhandled_exception
+  l.addi r0,r0,0xE00
+  l.jal  bsp_interrupt_handler_default
   l.nop
 
 .org 0xF00
@@ -218,6 +236,5 @@ _end_clear_bss:
 .global _unhandled_exception
 
 unhandled_exception:
-  l.j unhandled_exception
   l.nop
 
