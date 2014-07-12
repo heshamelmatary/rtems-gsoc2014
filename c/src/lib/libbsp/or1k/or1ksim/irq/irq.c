@@ -20,3 +20,23 @@ void bsp_interrupt_handler_default(int vector)
 {
     printk("spurious interrupt: %u\n", vector);
 }
+
+rtems_status_code bsp_interrupt_facility_initialize()
+{
+
+}
+
+bsp_interrupt_dispatch()
+{
+
+}
+
+rtems_status_code bsp_interrupt_vector_enable()
+{
+
+}
+
+rtems_status_code bsp_interrupt_vector_disable()
+{
+
+}
