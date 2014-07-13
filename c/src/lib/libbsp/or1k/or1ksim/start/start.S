@@ -121,7 +121,6 @@ _undef3:
 bsp_start_vector_table_begin:
 
   .word 0
-handler_reset:
   .word _start /* Reset */
   .word _OR1K_Exception_default /* Bus Error */ 
   .word _OR1K_Exception_default /* Data Page Fault */

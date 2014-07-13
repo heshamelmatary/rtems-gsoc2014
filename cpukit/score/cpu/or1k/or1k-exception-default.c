@@ -56,3 +56,10 @@ void __attribute__((naked)) _OR1K_Exception_default(void)
    );
   rtems_fatal( RTEMS_FATAL_SOURCE_EXCEPTION, (rtems_fatal_code) frame );
 }
+
+void rtems_exception_init_mngt(void)
+{
+      _CPU_ISR_install_vector(OR1K_EXCEPTION_TICK_TIMER,
+                              NULL,
+                              NULL);
+}

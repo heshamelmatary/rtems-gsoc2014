@@ -46,7 +46,7 @@ static void or1ksim_clock_initialize(void)
  /* Enable Timer interrupt, restart mode, zero counter register*/
   register uint32_t   sr;
   register uint32_t   mask;
- 
+
   asm volatile (
     "l.mfspr %0,r0,17;"
 	  "l.addi  %1,r0, 0xfffffff9;"
