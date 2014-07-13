@@ -17,6 +17,7 @@
 #include <rtems/system.h>
 #include <rtems/score/isr.h>
 #include <rtems/score/wkspace.h>
+#include <bsp/linker-symbols.h>
 
 /*  _CPU_Initialize
  *
@@ -27,6 +28,8 @@
  *    thread_dispatch - address of disptaching routine
  *
  */
+
+extern char bsp_start_vector_table_begin[];
 
 void _CPU_Initialize(
 void
@@ -66,8 +69,6 @@ void
 
 inline uint32_t   _CPU_ISR_Get_level( void )
 {
-  register uint32_t   sr;
-  //asm("l.mfspr %0,r0,0x17" : "=r" (sr));
   return 0;
 }
 
@@ -86,23 +87,10 @@ inline uint32_t   _CPU_ISR_Get_level( void )
  
 void _CPU_ISR_install_raw_handler(
   uint32_t   vector,
-  void    	 *new_handler,
-  void       *old_handler
+  proc_ptr    new_handler,
+  proc_ptr   *old_handler
 )
 {
-
-  register uint32_t   sr;
-  register uint32_t   mask;
-
-  asm volatile (
-    "l.mfspr %0,r0,17;"
-	  "l.addi  %1,r0, 0xfffffffb;"
-	  "l.and   %1,%1,%0" : "=r" (sr) : "r" (mask));
-
-  /**old_handler = *((proc_ptr*)&Or1k_Interrupt_Vectors[vector]);
-  *((proc_ptr*)&Or1k_Interrupt_Vectors[vector]) = new_handler;*/
-  
-  asm volatile ("l.mtspr r0,%0,0x11\n\t":: "r" (sr));
 
 }
 
@@ -128,26 +116,29 @@ void _CPU_ISR_install_raw_handler(
 
 void _CPU_ISR_install_vector(
   uint32_t    vector,
-  void*    new_handler,
-  void   *old_handler
+  proc_ptr    new_handler,
+  proc_ptr   *old_handler
 )
 {
-   //*old_handler = _ISR_Vector_table[ vector ];
+   volatile uint32_t *table = 
+     (volatile uint32_t *) bsp_start_vector_table_begin;
+   uint32_t current_handler = table [vector];
+   
+   ISR_Level level;
 
-   /*
-    *  If the interrupt vector table is a table of pointer to isr entry
-    *  points, then we need to install the appropriate RTEMS interrupt
-    *  handler for this vector number.
-    */
+  _ISR_Disable( level );
 
-   _CPU_ISR_install_raw_handler( vector, new_handler, old_handler );
+  /* The current handler is now the old one */
+  if (old_handler != NULL) {
+    *old_handler = (proc_ptr) current_handler;
+  }
 
-   /*
-    *  We put the actual user ISR address in '_ISR_vector_table'.  This will
-    *  be used by the _ISR_Handler so the user gets control.
-    */
-
-    //_ISR_Vector_table[ vector ] = new_handler;
+  /* Write only if necessary to avoid writes to a maybe read-only memory */
+  if (current_handler != (uint32_t) new_handler) {
+    table [vector] = (uint32_t) new_handler;
+  }
+    
+   _ISR_Enable( level );
 }
 
 /*PAGE

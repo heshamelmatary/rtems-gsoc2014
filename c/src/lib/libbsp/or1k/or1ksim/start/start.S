@@ -21,7 +21,6 @@
   .extern bsp_section_bss_begin
   .extern bsp_section_bss_end
 
-  .extern  bsp_start_vector_table_begin
   .extern  bsp_start_vector_table_end
   .extern  bsp_start_vector_table_size
   .extern  bsp_vector_table_size
@@ -34,7 +33,8 @@
   .extern bsp_interrupt_handler_default
 
   /* Global symbols */
-  .globl  _start
+  .global  _start
+  .global bsp_start_vector_table_begin
 
 /* Popualte HW vector table */
 
