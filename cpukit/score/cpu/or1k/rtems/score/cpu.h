@@ -530,7 +530,7 @@ typedef enum {
 #define CPU_OR1K_SR_EPH   0x4000    /* Exception Prefix High */
 #define CPU_OR1K_SR_FO    0x8000    /* Fixed One */
 #define CPU_OR1K_SR_SUMRA 0x10000   /* SPRs User Mode Read Access */
-#define CPU_OR1K_SR_CID   0xF0000000 /*Context ID (Fast Context Switching */
+#define CPU_OR1K_SR_CID   0xF0000000 /*Context ID (Fast Context Switching) */
 
 /*
  *  Macros to access required entires in the CPU Table are in 
@@ -695,16 +695,33 @@ typedef enum {
 
 static inline uint32_t or1k_interrupt_disable( void )
 {
-  register uint32_t tmp;
+  uint32_t tmp;
   
   __asm__ volatile(           
-    "l.mfspr %0,r0,%1;"      
-    "l.andi %0,%2,0xFFF9;"     
-    "l.mtspr r0,%2,%1;"  
+    "l.mfspr %0,r0,17;"      
+    "l.andi %0,%1,0xFFF9;"     
+    "l.mtspr r0,%1,17;"  
     : "=r" (tmp)  
-    : "N" (0x11), "r" (tmp)    
+    : "r" (tmp)  
+    : "memory"  
   ); 
     
+  return 0;
+}
+
+static inline void or1k_interrupt_enable(uint32_t level)
+{
+   uint32_t tmp;
+  
+  __asm__ volatile(           
+    "l.mfspr %0,r0,17;"      
+    "l.ori %0,%1,0x7;"     
+    "l.mtspr r0,%1,17;"  
+    : "=r" (tmp)  
+    : "r" (tmp) 
+    : "memory"
+  );
+  
   return 0;
 }
 
@@ -721,8 +738,7 @@ static inline uint32_t or1k_interrupt_disable( void )
  */
 
 #define _CPU_ISR_Enable( _isr_cookie )  \
-  { \
-  }
+  or1k_interrupt_enable( _isr_cookie )
 
 /*
  *  This temporarily restores the interrupt to _level before immediately
