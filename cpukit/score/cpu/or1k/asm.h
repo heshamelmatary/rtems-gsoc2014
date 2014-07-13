@@ -36,7 +36,7 @@
 #define ASM
 #endif
 #include <rtems/score/targopts.h>
-#include <rtems/score/or32.h>
+#include <rtems/score/or1k.h>
 
 /*
  *  Recent versions of GNU cpp define variables which indicate the
