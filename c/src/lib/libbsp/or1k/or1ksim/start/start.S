@@ -1,5 +1,21 @@
 #include <bsp/linker-symbols.h>
 
+/* The following macro defines the first instructions every exception 
+ * should execute before jumping to its handler function from the 
+ * exception vector table. First, r13 is saved to a dedicated word of
+ * memory because it will be used to load the address of the handler 
+ * within the vector table. After serving the exception, r13 is loaded
+ * back, and pc, sp registers are restored using l.rfe instruction which
+ * returns back to the origianl place where the exceptions happended.
+ */
+#define EXCEPTION_SETUP(vector) \
+  l.sw   lo(bsp_start_vector_table_begin)(r0), r13; \
+  l.ori  r13, r0, lo(bsp_start_vector_table_begin + ((vector) * 4)); \
+  l.lwz  r13, 0(r13); \
+  l.jr   r13; \
+  l.lwz  r13, lo(bsp_start_vector_table_begin)(r0)
+  l.rfe
+
   .extern bsp_start
   .extern boot_card
   .extern bsp_section_bss_begin
@@ -20,39 +36,29 @@
   /* Global symbols */
   .globl  _start
 
-/* Popualte vector table */
+/* Popualte HW vector table */
 
 .section .vector, "ax"
 
 .org 0x100
-bsp_start_vector_table_begin:
 _reset:
-  l.ori	r1,r0,0x1
-  l.mtspr	r0,r1,17
-  l.movhi  r4,hi(_start)
-  l.mtspr  r0,r0,0x1000
-  l.ori    r4,r4,lo(_start)
-  l.jr     r4
-  l.nop
+  EXCEPTION_SETUP(1)
 
 .org 0x200
 _buserr:
-  l.jal  _OR1K_Exception_default
-  l.nop
+  EXCEPTION_SETUP(2)
 
 .org 0x300
 _dPageFault:
-  l.jal  _OR1K_Exception_default
-  l.nop
+  EXCEPTION_SETUP(3)
 
 .org 0x400
 _iPageFaule:
-  l.jal  _OR1K_Exception_default
-  l.nop
+  EXCEPTION_SETUP(4)
 
 .org 0x500
 _timer:
-
+  EXCEPTION_SETUP(5)
   l.nop
   /*l.addi r1,r0,0x500
   l.jal  bsp_interrupt_handler_default
@@ -70,128 +76,69 @@ _misaligned:
 
 .org 0x700
 _undefIns:
-  l.jal  _OR1K_Exception_default
-  l.nop
+  EXCEPTION_SETUP(7)
 
 .org 0x800
 _exInt:
-  l.jal  _OR1K_Exception_default
-  l.nop
+  EXCEPTION_SETUP(8)
 
 .org 0x900
 _dTLB:
-  l.jal  _OR1K_Exception_default
-  l.nop
+  EXCEPTION_SETUP(9)
 
 .org 0xA00
 _iTLB:
-  l.jal  _OR1K_Exception_default
-  l.nop
+  EXCEPTION_SETUP(10)
 
 .org 0xB00
 _range:
-  l.jal  _OR1K_Exception_default
-  l.nop
+  EXCEPTION_SETUP(11)
 
 .org 0xC00
 _syscall:
-  l.jal  _OR1K_Exception_default
-  l.nop
+  EXCEPTION_SETUP(12)
 
 .org 0xD00
 _fp:
-  l.jal  _OR1K_Exception_default
-  l.nop
+  EXCEPTION_SETUP(13)
 
 .org 0xE00
 _trap:
-  l.jal  _OR1K_Exception_default
-  l.nop
+  EXCEPTION_SETUP(14)
 
 .org 0xF00
 _undef1:
-  l.jal  _OR1K_Exception_default
-  l.nop
-
-.org 0x1000
-_undef2:
-  l.jal  _OR1K_Exception_default
-  l.nop
-
-.org 0x1100
-_undef3:
-  l.jal  _OR1K_Exception_default
-  l.nop
-
-.org 0x1200
-_undef4:
-  l.jal  _OR1K_Exception_default
-  l.nop
-
-.org 0x1300
-_undef5:
-  l.jal  _OR1K_Exception_default
-  l.nop
-
-.org 0x1400
-_undef6:
-  l.jal  _OR1K_Exception_default
-  l.nop
+  EXCEPTION_SETUP(15)
 
 .org 0x1500
-_undef7:
-  l.jal  _OR1K_Exception_default
-  l.nop
-
-.org 0x1600
-_undef8:
-  l.jal  _OR1K_Exception_default
-  l.nop
-
-.org 0x1700
-_undef9:
-  l.jal  _OR1K_Exception_default
-  l.nop
-
-.org 0x1800
-_undef10:
-  l.jal  _OR1K_Exception_default
-  l.nop
+_undef2:
+  EXCEPTION_SETUP(16)
 
 .org 0x1900
-_undef11:
-  l.jal  _OR1K_Exception_default
-  l.nop
+_undef3:
+  EXCEPTION_SETUP(17)
 
-.org 0x1A00
-_undef12:
-  l.jal  _OR1K_Exception_default
-  l.nop
+bsp_start_vector_table_begin:
 
-.org 0x1B00
-_undef13:
-  l.jal  _OR1K_Exception_default
-  l.nop
-
-.org 0x1C00
-_undef14:
-  l.jal  _OR1K_Exception_default
-  l.nop
-
-.org 0x1D00
-_undef15:
-  l.jal  _OR1K_Exception_default
-  l.nop
-
-.org 0x1E00
-_undef16:
-  l.jal  _OR1K_Exception_default
-  l.nop
-
-.org 0x1F00
-_undef17:
-  l.jal  _OR1K_Exception_default
-  l.nop
+  .word 0
+handler_reset:
+  .word _start /* Reset */
+  .word _OR1K_Exception_default /* Bus Error */ 
+  .word _OR1K_Exception_default /* Data Page Fault */
+  .word _OR1K_Exception_default /* Instruction Page Fault */
+  .word _OR1K_Exception_default /* Tick timer */
+  .word _OR1K_Exception_default /* Alignment */
+  .word _OR1K_Exception_default /* Undefiend Instruction */
+  .word _OR1K_Exception_default /* External Interrupt */
+  .word _OR1K_Exception_default /* Data TLB Miss */
+  .word _OR1K_Exception_default /* Instruction TLB Miss */
+  .word _OR1K_Exception_default /* Range Exception */
+  .word _OR1K_Exception_default /* System Call */
+  .word _OR1K_Exception_default /* Floating Point Exception */
+  .word _OR1K_Exception_default /* Trap */
+  .word _OR1K_Exception_default /* Reserver for future use */
+  .word _OR1K_Exception_default /* Reserved for implementation-specific */
+  .word _OR1K_Exception_default /* Reserved for custom exceptions. */
 
 bsp_start_vector_table_end:
 
@@ -199,7 +146,11 @@ bsp_start_vector_table_end:
 
   .section  ".bsp_start_text", "ax"
 _start:
-/* load stack and frame pointers */
+  /* Set SP register to SP mode */
+  l.ori  r1,r0,0x1
+  l.mtspr r0,r1,17
+
+  /* load stack and frame pointers */
   l.movhi r1,hi(bsp_section_stack_begin)
   l.add   r2,r0,r1 
   

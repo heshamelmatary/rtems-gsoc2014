@@ -477,7 +477,7 @@ typedef void Context_Control_fp;
 typedef Context_Control CPU_Interrupt_frame;
 
 typedef enum {
-  OR1K_EXCEPTION_RESET = 1, /
+  OR1K_EXCEPTION_RESET = 1, 
   OR1K_EXCEPTION_BUS_ERR = 2, 
   OR1K_EXCEPTION_D_PF = 3, /* Data Page Fault */
   OR1K_EXCEPTION_I_PF = 4, /* Instruction Page Fault */
@@ -491,9 +491,9 @@ typedef enum {
   OR1K_EXCPETION_SYS_CALL = 12,
   OR1K_EXCPETION_FP = 13, /* Floating point exception */
   OR1K_EXCPETION_TRAP = 14, /* Caused by l.trap instruction or by debug unit */
-  OR1K_EXCPETION_RESERVED = 15,
-  OR1K_EXCPETION_RESERVED = 16,
-  OR1K_EXCPETION_RESERVED = 17,
+  OR1K_EXCPETION_RESERVED1 = 15,
+  OR1K_EXCPETION_RESERVED2 = 16,
+  OR1K_EXCPETION_RESERVED3 = 17,
   MAX_EXCEPTIONS = 17,
   OR1K_EXCEPTION_MAKE_ENUM_32_BIT = 0xffffffff
 } OR1K_symbolic_exception_name;
