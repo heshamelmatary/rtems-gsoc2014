@@ -911,37 +911,7 @@ typedef uint16_t         Priority_bit_map_Word;
 #define CPU_PER_CPU_CONTROL_SIZE 0
 
 typedef struct {
-  uint32_t register_r1;
-  uint32_t register_r2;
-  uint32_t register_r3;
-  uint32_t register_r4;
-  uint32_t register_r5;
-  uint32_t register_r6;
-  uint32_t register_r7;
-  uint32_t register_r8;
-  uint32_t register_r9;
-  uint32_t register_r10;
-  uint32_t register_r11;
-  uint32_t register_r12;
-  uint32_t register_r13;
-  uint32_t register_r14;
-  uint32_t register_r15;
-  uint32_t register_r16;
-  uint32_t register_r17;
-  uint32_t register_r18;
-  uint32_t register_r19;
-  uint32_t register_r20;
-  uint32_t register_r21;
-  uint32_t register_r22;
-  uint32_t register_r23;
-  uint32_t register_r24;
-  uint32_t register_r25;
-  uint32_t register_r26;
-  uint32_t register_r27;
-  uint32_t register_r28;
-  uint32_t register_r29;
-  uint32_t register_r30;
-  uint32_t register_r31;
+  uint32_t r[32];
 } CPU_Exception_frame;
 
 /**
@@ -950,6 +920,8 @@ typedef struct {
  * @see rtems_fatal() and RTEMS_FATAL_SOURCE_EXCEPTION.
  */
 void _CPU_Exception_frame_print( const CPU_Exception_frame *frame );
+
+//void _OR1K_Exception_default( CPU_Exception_frame *frame )
 
 /* end of Priority handler macros */
 

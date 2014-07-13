@@ -21,7 +21,8 @@ libscorecpu_a_SOURCES =
 libscorecpu_a_SOURCES += cpu.c
 libscorecpu_a_SOURCES += or1k-context-switch.S
 libscorecpu_a_SOURCES += or1k-context-initialize.c
-
+libscorecpu_a_SOURCES += or1k-exception-default.c
+libscorecpu_a_SOURCES += or1k-exception-frame-print.c
 
 libscorecpu_a_CPPFLAGS = $(AM_CPPFLAGS)
 

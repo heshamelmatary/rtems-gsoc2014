@@ -24,16 +24,28 @@ void bsp_interrupt_handler_default(int vector)
 rtems_status_code bsp_interrupt_facility_initialize()
 {
 
+
 }
 
-bsp_interrupt_dispatch()
+void bsp_interrupt_dispatch()
 {
 
 }
 
 rtems_status_code bsp_interrupt_vector_enable()
 {
-
+  register uint32_t   sr;
+  
+  /* Enable CPU interrupts */
+  asm volatile (
+    "l.mfspr %0,r0,17;"
+    "l.ori %0,%1,0x7;"
+    "l.mtspr r0,%1,0x11\n\t" : "=r" (sr): "r" (sr)
+    );
+    
+  /* Enable external interrupts */
+  
+  
 }
 
 rtems_status_code bsp_interrupt_vector_disable()
