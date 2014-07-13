@@ -511,7 +511,7 @@ typedef enum {
  */
  
 /* Supervision Mode Register */
-#define CPU_OR1K_SR  17
+#define CPU_OR1K_SR 17
 
 #define CPU_OR1K_SR_SM    0x1       /* Supervisor Mode */ 
 #define CPU_OR1K_SR_TEE   0x2       /* Tick Timer Exception Enabled */
@@ -693,10 +693,25 @@ typedef enum {
  *
  */
 
+static inline uint32_t or1k_interrupt_disable( void )
+{
+  register uint32_t tmp;
+  
+  __asm__ volatile(           
+    "l.mfspr %0,r0,%1;"      
+    "l.andi %0,%2,0xFFF9;"     
+    "l.mtspr r0,%2,%1;"  
+    : "=r" (tmp)  
+    : "N" (0x11), "r" (tmp)    
+  ); 
+    
+  return 0;
+}
+
 #define _CPU_ISR_Disable( _isr_cookie ) \
-  { \
-    (_isr_cookie) = 0;   /* do something to prevent warnings */ \
-  }
+  do{ \
+    _isr_cookie = or1k_interrupt_disable(); \
+  } while (0)
 
 /*
  *  Enable interrupts to the previous level (returned by _CPU_ISR_Disable).
@@ -1020,8 +1035,8 @@ void _CPU_Initialize(
  
 void _CPU_ISR_install_raw_handler(
   uint32_t    vector,
-  void   *new_handler,
-  void   *old_handler
+  proc_ptr    new_handler,
+  proc_ptr   *old_handler
 );
 
 /*
@@ -1036,8 +1051,8 @@ void _CPU_ISR_install_raw_handler(
 
 void _CPU_ISR_install_vector(
   uint32_t    vector,
-  void   *new_handler,
-  void   *old_handler
+  proc_ptr   new_handler,
+  proc_ptr   *old_handler
 );
 
 /*
