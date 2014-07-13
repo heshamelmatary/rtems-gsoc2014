@@ -476,6 +476,27 @@ typedef struct {
 typedef void Context_Control_fp;
 typedef Context_Control CPU_Interrupt_frame;
 
+typedef enum {
+  OR1K_EXCEPTION_RESET = 1, /
+  OR1K_EXCEPTION_BUS_ERR = 2, 
+  OR1K_EXCEPTION_D_PF = 3, /* Data Page Fault */
+  OR1K_EXCEPTION_I_PF = 4, /* Instruction Page Fault */
+  OR1K_EXCEPTION_TICK_TIMER = 5, 
+  OR1K_EXCEPTION_ALIGNMENT = 6,
+  OR1K_EXCEPTION_I_UNDEF= 7, /* Undefiend instruction */
+  OR1K_EXCEPTION_IRQ = 8, /* External interrupt */
+  OR1K_EXCPETION_D_TLB = 9, /* Data TLB miss */ 
+  OR1K_EXCPETION_I_TLB = 10, /* Instruction TLB miss */
+  OR1K_EXCPETION_RANGE = 11, /* Range exception */
+  OR1K_EXCPETION_SYS_CALL = 12,
+  OR1K_EXCPETION_FP = 13, /* Floating point exception */
+  OR1K_EXCPETION_TRAP = 14, /* Caused by l.trap instruction or by debug unit */
+  OR1K_EXCPETION_RESERVED = 15,
+  OR1K_EXCPETION_RESERVED = 16,
+  OR1K_EXCPETION_RESERVED = 17,
+  MAX_EXCEPTIONS = 17,
+  OR1K_EXCEPTION_MAKE_ENUM_32_BIT = 0xffffffff
+} OR1K_symbolic_exception_name;
 
 /*
  *  The following table contains the information required to configure
