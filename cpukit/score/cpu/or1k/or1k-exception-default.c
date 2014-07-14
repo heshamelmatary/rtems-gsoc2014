@@ -60,7 +60,7 @@ void __attribute__((naked)) _OR1K_Exception_default(void)
 
 /* Save exception frame context from exception */
 
-void __attribute__((naked)) _OR1K_Exception_Process(uint32_t vector_index)
+void __attribute__((naked)) _OR1K_Exception(uint32_t vector_index)
 {
    volatile CPU_Exception_frame *frame;
    volatile uint32_t *vector_base = bsp_start_vector_table_begin;
