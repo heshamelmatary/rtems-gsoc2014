@@ -29,9 +29,9 @@
 
 _OR1K_Exception_Process:
   l.addi  r1, r1, -128
-  l.sw  8(r1),r2
   /* r3 is saved by exception handler */
   l.sw  20(r1),r5
+  l.sw  8(r1),r2
   l.sw  24(r1),r6 
   l.sw  28(r1),r7
   l.sw  32(r1),r8
