@@ -25,6 +25,7 @@
 .align 4
 .text
 .global _OR1K_Exception_Process 
+.type	  _OR1K_Exception_Process,@function
 
 _OR1K_Exception_Process:
   l.addi  r1, r1, -128
