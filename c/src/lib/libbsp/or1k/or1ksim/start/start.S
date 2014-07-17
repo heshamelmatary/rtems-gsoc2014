@@ -82,12 +82,10 @@ _iPageFaule:
 _timer:
   EXCEPTION_SETUP(5)
 
-
-  /*l.addi r3,r0,5
-  l.jal _OR1K_Exception_Process
+.org 0x600
+_unalign:
   l.rfe
   l.nop
-  */
 
 .org 0x700
 _undefIns:
@@ -168,6 +166,7 @@ _start:
 
   /* load stack and frame pointers */
   l.movhi r1,hi(bsp_section_stack_begin)
+  l.ori   r1, r1, lo(bsp_section_stack_begin)
   l.add   r2,r0,r1 
   
 /* Clearing .bss */

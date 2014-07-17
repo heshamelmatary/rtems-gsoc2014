@@ -25,7 +25,7 @@ bsp_processor_count = DEFINED (bsp_processor_count) ? bsp_processor_count : 1;
 MEMORY
   {
       VECTOR_RAM     (AIW) : ORIGIN = 0x0       , LENGTH = 8260
-      RAM   : org = 0x00002048, l = 0x00080000
+      RAM   : org = 0x00002048, l = 0x7FFDFBC 
       UNEXPECTED_SECTIONS : ORIGIN = 0xffffffff, LENGTH = 0
   }
 
@@ -314,7 +314,7 @@ SECTIONS {
   .stack : ALIGN_WITH_INPUT {
     bsp_section_stack_end = .;
   } > REGION_STACK AT > REGION_STACK
-  bsp_section_stack_begin = 0x00802000;
+  bsp_section_stack_begin = 0x7FFFFF8;
   bsp_section_stack_size = bsp_section_stack_begin - bsp_section_stack_end;
 
   /* FIXME */
