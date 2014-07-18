@@ -20,6 +20,7 @@
 #endif
 
 #include <rtems/asm.h>
+#include <rtems/score/percpu.h>
 #include <bsp/linker-symbols.h>
 
 .align 4
@@ -28,9 +29,24 @@
 .type	  _OR1K_Exception_Process,@function
 
 _OR1K_Exception_Process:
-  l.addi  r1, r1, -128
+  l.addi  r1, r1, -140
   /* r3 is saved by exception handler */
   l.sw  20(r1),r5
+ 
+  /* Disable multitasking */
+  l.movhi r3, hi(THREAD_DISPATCH_DISABLE_LEVEL)
+  l.ori   r3, r3, lo(THREAD_DISPATCH_DISABLE_LEVEL)
+  l.lwz   r5, 0(r3)
+  l.addi  r5, r0, 1
+  l.sw    0(r3), r5
+  
+  /* Increment nesting level */
+  l.movhi r3, hi(ISR_NEST_LEVEL)
+  l.ori   r3, r3, lo(ISR_NEST_LEVEL)
+  l.lwz   r5, 0(r3)
+  l.addi  r5, r0, 1
+  l.sw    0(r3), r5
+  
   l.sw  8(r1),r2
   l.sw  24(r1),r6 
   l.sw  28(r1),r7
@@ -58,6 +74,20 @@ _OR1K_Exception_Process:
   l.sw  116(r1),r29
   l.sw  120(r1),r30
   l.sw  124(r1),r31
+  /* Exception level related registers */
+  
+  /* EPCR */
+  l.mfspr r13, r0, 32 
+  l.sw  128(r1), r13 /* epcr */
+
+  /* EEAR */
+  l.mfspr r13, r0, 48 
+  l.sw  132(r1), r13 /* eear */
+  
+  /* ESR */
+  l.mfspr r13, r0, 64 
+  l.sw  136(r1), r13  /* esr */ 
+
   
   /* Call the exception handler from vector table */
   l.slli r3, r3, 2
@@ -67,6 +97,35 @@ _OR1K_Exception_Process:
   l.nop
   
 exception_frame_restore:
+
+  /* Exception level related registers */
+  
+  /* EPCR */
+  l.lwz  r13,  128(r1)
+  l.mtspr r0, r13, 32 
+
+  /* EEAR */
+  l.lwz  r13,  132(r1)
+  l.mtspr r0, r13, 48 
+  
+  /* ESR */
+  l.lwz  r13,  136(r1)
+  l.mtspr r0, r13, 64
+  
+  /* Enable multitasking */
+  l.movhi r3, hi(THREAD_DISPATCH_DISABLE_LEVEL)
+  l.ori   r3, r3, lo(THREAD_DISPATCH_DISABLE_LEVEL)
+  l.lwz   r5, 0(r3)
+  l.addi  r5, r0, -1
+  l.sw    0(r3), r5
+  
+  /* Decrement nesting level */
+  l.movhi r3, hi(ISR_NEST_LEVEL)
+  l.ori   r3, r3, lo(ISR_NEST_LEVEL)
+  l.lwz   r5, 0(r3)
+  l.addi  r5, r0, -1
+  l.sw    0(r3), r5
+  
   l.lwz  r2,  8(r1)
   l.lwz  r3,  12(r1)
   l.lwz  r5,  20(r1)
@@ -96,8 +155,70 @@ exception_frame_restore:
   l.lwz  r29, 116(r1)
   l.lwz  r30, 120(r1)
   l.lwz  r31, 124(r1)
-  l.addi r1, r1, 128
- 
+  
+  l.movhi r3, hi(DISPATCH_NEEDED)
+  l.ori   r3, r3, lo(DISPATCH_NEEDED)
+  l.lwz   r5, 0(r3)
+  l.sfne  r5, r0 
+  l.bf    _ISR_Dispatch /* Thread dispatch necessary */
+  l.nop 
+
+  
+  l.addi r1, r1, 140
+  
   l.jr   r9
+  l.nop
+
+.global SYM (_ISR_Dispatch)
+SYM (_ISR_Dispatch):
+
+  l.jal _Thread_Dispatch
+  
+  /* Exception level related registers */
+  
+  /* EPCR */
+  l.lwz  r13,  128(r1)
+  l.mtspr r0, r13, 32 
+
+  /* EEAR */
+  l.lwz  r13,  132(r1)
+  l.mtspr r0, r13, 48 
+  
+  /* ESR */
+  l.lwz  r13,  136(r1)
+  l.mtspr r0, r13, 64
+  
+  l.lwz  r2,  8(r1)
+  l.lwz  r3,  12(r1)
+  l.lwz  r5,  20(r1)
+  l.lwz  r6,  24(r1)
+  l.lwz  r7,  28(r1)
+  l.lwz  r8,  32(r1)
+  l.lwz  r9,  36(r1)
+  l.lwz  r10, 40(r1)
+  l.lwz  r11, 44(r1)
+  l.lwz  r12, 48(r1)
+  l.lwz  r13, 52(r1)
+  l.lwz  r14, 56(r1)
+  l.lwz  r15, 60(r1)
+  l.lwz  r16, 64(r1)
+  l.lwz  r17, 68(r1)
+  l.lwz  r18, 72(r1)
+  l.lwz  r19, 76(r1)
+  l.lwz  r20, 80(r1)
+  l.lwz  r21, 84(r1)
+  l.lwz  r22, 88(r1)
+  l.lwz  r23, 92(r1)
+  l.lwz  r24, 96(r1)
+  l.lwz  r25, 100(r1)
+  l.lwz  r26, 104(r1)
+  l.lwz  r27, 108(r1)
+  l.lwz  r28, 112(r1)
+  l.lwz  r29, 116(r1)
+  l.lwz  r30, 120(r1)
+  l.lwz  r31, 124(r1)
+  
+  l.jr  r9
+  l.addi r1, r1, 140
   l.nop
 
