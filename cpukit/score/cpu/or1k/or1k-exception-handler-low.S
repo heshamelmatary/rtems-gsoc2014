@@ -21,7 +21,6 @@
 
 #include <rtems/asm.h>
 #include <rtems/score/percpu.h>
-#include <bsp/linker-symbols.h>
 
 .align 4
 .text
@@ -29,25 +28,27 @@
 .type	  _OR1K_Exception_Process,@function
 
 _OR1K_Exception_Process:
+  
   l.addi  r1, r1, -140
   /* r3 is saved by exception handler */
   l.sw  20(r1),r5
- 
-  /* Disable multitasking */
-  l.movhi r3, hi(THREAD_DISPATCH_DISABLE_LEVEL)
-  l.ori   r3, r3, lo(THREAD_DISPATCH_DISABLE_LEVEL)
-  l.lwz   r5, 0(r3)
-  l.addi  r5, r0, 1
-  l.sw    0(r3), r5
-  
+  l.sw  24(r1),r6
   /* Increment nesting level */
-  l.movhi r3, hi(ISR_NEST_LEVEL)
-  l.ori   r3, r3, lo(ISR_NEST_LEVEL)
-  l.lwz   r5, 0(r3)
-  l.addi  r5, r0, 1
-  l.sw    0(r3), r5
+  l.movhi r6, hi(_Per_CPU_Information + 0)
+  l.ori   r6, r6, lo(_Per_CPU_Information + 0)
+  l.lwz   r5, 0(r6)
+  l.addi  r5, r5, 1
+  l.sw    0(r6), r5
+  
+  /* Disable multitasking */
+  l.movhi r6, hi(_Per_CPU_Information + 4)
+  l.ori   r6, r6, lo(_Per_CPU_Information + 4)
+  l.lwz   r5, 0(r6)
+  l.addi  r5, r5, 1
+  l.sw    0(r6), r5
   
   l.sw  8(r1),r2
+  
   l.sw  24(r1),r6 
   l.sw  28(r1),r7
   l.sw  32(r1),r8
@@ -112,19 +113,19 @@ exception_frame_restore:
   l.lwz  r13,  136(r1)
   l.mtspr r0, r13, 64
   
-  /* Enable multitasking */
-  l.movhi r3, hi(THREAD_DISPATCH_DISABLE_LEVEL)
-  l.ori   r3, r3, lo(THREAD_DISPATCH_DISABLE_LEVEL)
-  l.lwz   r5, 0(r3)
-  l.addi  r5, r0, -1
-  l.sw    0(r3), r5
-  
   /* Decrement nesting level */
-  l.movhi r3, hi(ISR_NEST_LEVEL)
-  l.ori   r3, r3, lo(ISR_NEST_LEVEL)
-  l.lwz   r5, 0(r3)
-  l.addi  r5, r0, -1
-  l.sw    0(r3), r5
+  l.movhi r6, hi(_Per_CPU_Information + 0)
+  l.ori   r6, r6, lo(_Per_CPU_Information + 0)
+  l.lwz   r5, 0(r6)
+  l.addi  r5, r5, -1
+  l.sw    0(r6), r5
+  
+  /* Enable multitasking */
+  l.movhi r6, hi(_Per_CPU_Information + 4)
+  l.ori   r6, r6, lo(_Per_CPU_Information + 4)
+  l.lwz   r5, 0(r6)
+  l.addi  r5, r5, -1
+  l.sw    0(r6), r5
   
   l.lwz  r2,  8(r1)
   l.lwz  r3,  12(r1)
@@ -132,7 +133,6 @@ exception_frame_restore:
   l.lwz  r6,  24(r1)
   l.lwz  r7,  28(r1)
   l.lwz  r8,  32(r1)
-  l.lwz  r9,  36(r1)
   l.lwz  r10, 40(r1)
   l.lwz  r11, 44(r1)
   l.lwz  r12, 48(r1)
@@ -154,25 +154,53 @@ exception_frame_restore:
   l.lwz  r28, 112(r1)
   l.lwz  r29, 116(r1)
   l.lwz  r30, 120(r1)
-  l.lwz  r31, 124(r1)
   
-  l.movhi r3, hi(DISPATCH_NEEDED)
-  l.ori   r3, r3, lo(DISPATCH_NEEDED)
-  l.lwz   r5, 0(r3)
-  l.sfne  r5, r0 
+  /* Enable interrupts */
+  l.mfspr r31, r0, 17
+  l.ori   r31, r31, 0x7
+  l.mtspr r0, r31, 17
+  
+  l.movhi r3, hi(_Per_CPU_Information + 8)
+  l.ori   r3, r3, lo(_Per_CPU_Information + 8)
+  l.lwz   r31, 0(r3)
+  l.sfles r31, r0 
+  l.lwz  r31, 124(r1)
   l.bf    _ISR_Dispatch /* Thread dispatch necessary */
   l.nop 
-
   
   l.addi r1, r1, 140
   
-  l.jr   r9
+  l.lwz  r3, 0(r1)
+  l.lwz  r13, 4(r1)
+  l.addi r1, r1, 8
+  
+  l.rfe
   l.nop
 
 .global SYM (_ISR_Dispatch)
 SYM (_ISR_Dispatch):
 
+  l.sw  4(r1),r1
+  l.sw  8(r1),r2
+  l.sw  16(r1),r4 
+  l.sw  20(r1),r5
+  l.sw  24(r1),r6
+  l.sw  28(r1),r7
+  l.sw  32(r1),r8
+  /* Skip r10 as it's preserved to be used by TLS */
+  /* The following set if registers are preserved across function calls */
+  l.sw  56(r1),r14
+  l.sw  64(r1),r16
+  l.sw  72(r1),r18
+  l.sw  80(r1),r20
+  l.sw  88(r1),r22
+  l.sw  96(r1),r24
+  l.sw  104(r1),r26
+  l.sw  112(r1),r28
+  l.sw  120(r1),r30
+  
   l.jal _Thread_Dispatch
+  l.nop
   
   /* Exception level related registers */
   
@@ -188,8 +216,8 @@ SYM (_ISR_Dispatch):
   l.lwz  r13,  136(r1)
   l.mtspr r0, r13, 64
   
+  l.lwz  r1,  4(r1)
   l.lwz  r2,  8(r1)
-  l.lwz  r3,  12(r1)
   l.lwz  r5,  20(r1)
   l.lwz  r6,  24(r1)
   l.lwz  r7,  28(r1)
@@ -218,7 +246,12 @@ SYM (_ISR_Dispatch):
   l.lwz  r30, 120(r1)
   l.lwz  r31, 124(r1)
   
-  l.jr  r9
   l.addi r1, r1, 140
+  
+  l.lwz  r3, 0(r1)
+  l.lwz  r13, 4(r1)
+  l.addi r1, r1, 8
+  
+  l.rfe
   l.nop
 

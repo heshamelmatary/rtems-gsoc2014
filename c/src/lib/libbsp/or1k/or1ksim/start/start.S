@@ -9,13 +9,15 @@
  * returns back to the origianl place where the exceptions happended.
  */
 #define EXCEPTION_SETUP(vector) \
-  l.sw   lo(bsp_start_vector_table_begin)(r0), r3; \
-  l.addi r3, r0, vector; \
-  l.jal  _OR1K_Exception_Process; \
-  l.nop; \
-  l.lwz  r3, lo(bsp_start_vector_table_begin)(r0);\
-  l.rfe;\
-  l.nop
+  l.nop   ;\
+  l.addi  r1, r1, -8 ;\
+  l.sw    0(r1), r3; \
+  l.sw    4(r1), r13; \
+  l.addi  r3, r0, vector; \
+  l.movhi r13, hi(_OR1K_Exception_Process); \
+  l.ori   r13, r13, lo (_OR1K_Exception_Process); \
+  l.jr    r13; \ 
+  l.nop 
 
   /*l.sw   lo(bsp_start_vector_table_begin)(r0), r13; \
   l.ori  r13, r0, lo(bsp_start_vector_table_begin + ((vector) * 4)); \

@@ -29,8 +29,6 @@
  *
  */
 
-extern char bsp_start_vector_table_begin[];
-
 void _CPU_Initialize(
 void
 )
@@ -59,17 +57,41 @@ void
  // _CPU_Table = *cpu_table;
 }
 
+inline void _CPU_ISR_Set_level(uint32_t level)
+{
+  uint32_t sr = 0;
+  level = (level > 0)? 1 : 0;
+  
+  /* map level bit to or1k interrupt enable/disable bit in sr register */
+  level <<= 2;
+  
+  asm volatile (
+    "l.mfspr %0, r0, 17;"
+    "l.or    %0, %1, %2;"
+    "l.mtspr r0, %0 ,17;"
+    : "=r" (sr) : "r" (level), "r" (level)
+  );
+}
 /*PAGE
  *
  *  _CPU_ISR_Get_level
  *
  *  or1k Specific Information:
+ *  Currently there is only two levels of interrupts: enabled 
+ *  and disabled. 
  *
  */
 
-inline uint32_t   _CPU_ISR_Get_level( void )
+inline uint32_t  _CPU_ISR_Get_level( void )
 {
-  return 0;
+  uint32_t sr= 0;
+  
+  asm volatile (
+  "l.mfspr  %0,r0,17;"
+  : "=r" (sr)
+  );
+  
+  return (sr & 4)? 0 : 1;
 }
 
 /*PAGE
@@ -153,7 +175,9 @@ void _CPU_Install_interrupt_stack( void )
 {
 }
 
-void _CPU_Context_Initialize_fp (void)
+void _CPU_Context_Initialize_fp(
+  void **fp_context_ptr
+)
 {
 }
 
