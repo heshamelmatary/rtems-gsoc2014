@@ -32,7 +32,6 @@ _CPU_Context_switch:
   l.sw  28(r3),r8
   l.sw  32(r3),r9
   /* Skip r10 as it's preserved to be used by TLS */
-  /* Skip r11, setjmp always set it to 0 */
   /* The following set if registers are preserved across function calls */
   l.sw  52(r3),r14
   l.sw  60(r3),r16
@@ -43,13 +42,40 @@ _CPU_Context_switch:
   l.sw  100(r3),r26
   l.sw  108(r3),r28
   l.sw  116(r3),r30
-/* Supervision Register */
+  
+  /* Supervision Register */
   l.mfspr r13,r0,17  
   l.sw  124(r3),r13
+  
+  /* EPCR */
+  l.mfspr r13, r0, 32 
+  l.sw  128(r3), r13 /* epcr */
+
+  /* EEAR */
+  l.mfspr r13, r0, 48 
+  l.sw  132(r3), r13 /* eear */
+  
+  /* ESR */
+  l.mfspr r13, r0, 64 
+  l.sw  136(r3), r13  /* esr */
   
 restore:
   l.lwz   r13,124(r4)
   l.mtspr r0,r13,17
+  
+  /* Exception level related registers */
+  
+  /* EPCR */
+  l.lwz  r13,  128(r4)
+  l.mtspr r0, r13, 32 
+
+  /* EEAR */
+  l.lwz  r13,  132(r4)
+  l.mtspr r0, r13, 48 
+  
+  /* ESR */
+  l.lwz  r13,  136(r4)
+  l.mtspr r0, r13, 64
   
   l.lwz  r1,0(r4)
   l.lwz  r2,4(r4)
@@ -78,9 +104,7 @@ restore:
  _CPU_Context_restore:
   l.add   r4,r3,r0
   l.add   r13,r0,r0
-  l.movhi r13,hi(restore)
-  l.ori   r13,r13,lo(restore)
-  l.jr    r13
+  l.j     restore
   l.nop
   
  _CPU_Context_restore_fp:

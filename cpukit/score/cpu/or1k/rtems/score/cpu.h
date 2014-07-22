@@ -27,9 +27,10 @@
 extern "C" {
 #endif
 
-#include <stdint.h>
+
 #include "rtems/score/or1k.h"            /* pick up machine definitions */
 #ifndef ASM
+#include <stdint.h>
 #include "rtems/score/types.h"
 #endif
 
@@ -275,12 +276,6 @@ extern "C" {
  *  If TRUE, then the grows upward.
  *  If FALSE, then the grows toward smaller addresses.
  *
- *  OR1k Specific Information:
- *  
- *  Previously I had misread the documentation and set this
- *  to true. Surprisingly, it seemed to work anyway. I'm
- *  therefore not 100% sure exactly what this does. It should
- *  be correct as it is now, however. 
  */
 
 #define CPU_STACK_GROWS_UP               FALSE
@@ -375,7 +370,7 @@ extern "C" {
  *
  *
  */
-
+#ifndef ASM
 #ifdef OR1K_64BIT_ARCH
 #define or1kreg uint64_t  
 #else
@@ -466,8 +461,10 @@ typedef struct {
   uint32_t  r30;
   uint32_t  r31;
   
-  uint32_t  sr;     /* Current supervision register non persistent values */
-  
+  uint32_t  sr;  /* Current supervision register non persistent values */
+  uint32_t  epcr;
+  uint32_t  eear;
+  uint32_t  esr;
 } Context_Control;
 
 #define _CPU_Context_Get_SP( _context ) \
@@ -695,34 +692,42 @@ typedef enum {
 
 static inline uint32_t or1k_interrupt_disable( void )
 {
-  uint32_t tmp;
+  volatile uint32_t sr = 0;
+  volatile uint32_t interrupt_disable_mask = 0xFFFFFFFB;
   
   __asm__ volatile(           
     "l.mfspr %0,r0,17;"      
-    "l.andi %0,%1,0xFFF9;"     
-    "l.mtspr r0,%1,17;"  
-    : "=r" (tmp)  
-    : "r" (tmp)  
+    "l.and   %0,%0,%1;"     
+    "l.mtspr r0,%0,17;"  
+    : "=r" (sr)  
+    : "r" (interrupt_disable_mask)
     : "memory"  
   ); 
     
-  return 0;
+  return 1;
 }
 
 static inline void or1k_interrupt_enable(uint32_t level)
 {
-   uint32_t tmp;
+  uint32_t sr = 0;
   
+  /* Currently there are only two interrup level: enable/disable. */
+  
+  /* The following statement maps the level to HW level bit in the 
+   * SR register. If the level > 0 then (should be only 1), then   
+   * interrupts should be enabled.
+   */
+  
+   //level = (level > 0) 1<<2 : 0; 
+   
   __asm__ volatile(           
     "l.mfspr %0,r0,17;"      
-    "l.ori %0,%1,0x7;"     
-    "l.mtspr r0,%1,17;"  
-    : "=r" (tmp)  
-    : "r" (tmp) 
-    : "memory"
+    "l.ori   %0,%0,0x7;"     
+    "l.mtspr r0,%0,17;"  
+    : "=r" (sr)  
+    :: "memory"
   );
-  
-  return 0;
+
 }
 
 #define _CPU_ISR_Disable( _isr_cookie ) \
@@ -766,9 +771,7 @@ static inline void or1k_interrupt_enable(uint32_t level)
  *
  */
 
-#define _CPU_ISR_Set_level( new_level ) \
-  { \
-  }
+void   _CPU_ISR_Set_level( uint32_t level );
 
 uint32_t   _CPU_ISR_Get_level( void );
 
@@ -776,6 +779,7 @@ uint32_t   _CPU_ISR_Get_level( void );
 
 /* Context handler macros */
 
+#define OR1K_FAST_CONTEXT_SWITCH_ENABLED FALSE
 /*
  *  Initialize the context to a state suitable for starting a
  *  task after a context restore operation.  Generally, this
@@ -870,11 +874,10 @@ void _CPU_Context_Initialize(
  *
  */
 
-/*#define _CPU_Context_Initialize_fp( _destination ) \
-  { \
-   *(*(_destination)) = _CPU_Null_fp_context; \
-  }
-*/
+void _CPU_Context_Initialize_fp(
+  void **fp_context_ptr
+);
+
 /* end of Context handler macros */
 
 /* Fatal Error manager macros */
@@ -1006,15 +1009,28 @@ void _CPU_Context_Initialize(
 typedef struct {
 /* There is no CPU specific per-CPU state */
 } CPU_Per_CPU_control;
+#endif /* ASM */
 
-typedef uint32_t CPU_Counter_ticks;
-typedef uint16_t         Priority_bit_map_Word;
 #define CPU_SIZEOF_POINTER 4
-
 #define CPU_PER_CPU_CONTROL_SIZE 0
+
+#ifndef ASM
+typedef uint32_t CPU_Counter_ticks;
+typedef uint16_t Priority_bit_map_Word;
 
 typedef struct {
   uint32_t r[32];
+  
+  /* The following registers must be saved if we have 
+  fast context switch disabled and nested interrupt 
+  levels are enabled. 
+  */
+#if !OR1K_FAST_CONTEXT_SWITCH_ENABLED
+  uint32_t epcr; /* exception PC register */
+  uint32_t eear; /* exception effective address register */
+  uint32_t esr; /* exception supervision register */
+#endif 
+  
 } CPU_Exception_frame;
 
 /**
@@ -1183,10 +1199,9 @@ static inline unsigned int CPU_swap_u32(
   return( swapped );
 }
 
-typedef uint32_t CPU_Counter_ticks;
-
 #define CPU_swap_u16( value ) \
   (((value&0xff) << 8) | ((value >> 8)&0xff))
+#endif /* ASM */
 
 #ifdef __cplusplus
 }

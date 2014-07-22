@@ -26,7 +26,7 @@
 
 static void or1ksim_clock_at_tick(void)
 {
-  uint32_t TTMR = 0x600fffff;
+  uint32_t TTMR = 0x600FFED9;
   asm volatile (  
     "l.mtspr r0,%0,0x5000;" /* load TTMR register */
     ::"r" (TTMR): "memory"
@@ -66,7 +66,7 @@ static void or1ksim_clock_initialize(void)
    _ISR_Disable( level );
  
   /* Set timer contents to restrt mode */
-  TTMR = 0x600fffff;
+  TTMR = 0x600FFED9;
    asm volatile (  
     "l.mtspr r0,%0,0x5000;" /* load TTMR register */
     :: "r" (TTMR): "memory"
@@ -90,7 +90,7 @@ static void or1ksim_clock_initialize(void)
  */
 static uint32_t or1ksim_clock_nanoseconds_since_last_tick(void)
 {
-  return 0;
+  return (uint32_t) 12345;
 }
 
 #define Clock_driver_support_at_tick() or1ksim_clock_at_tick()

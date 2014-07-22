@@ -1,17 +1,20 @@
 /**
- * @file rtems/asm.h
+ * @file
+ * 
+ * @brief Address the Problems Caused by Incompatible Flavor of 
+ * Assemblers and Toolsets
  *
- *  This include file attempts to address the problems
- *  caused by incompatible flavors of assemblers and
- *  toolsets.  It primarily addresses variations in the
- *  use of leading underscores on symbols and the requirement
- *  that register names be preceded by a %.
+ * This include file attempts to address the problems
+ * caused by incompatible flavors of assemblers and
+ * toolsets.  It primarily addresses variations in the
+ * use of leading underscores on symbols and the requirement
+ * that register names be preceded by a %.
+ * 
+ * NOTE: The spacing in the use of these macros
+ *       is critical to them working as advertised.
  */
 
 /*
- *  NOTE: The spacing in the use of these macros
- *        is critical to them working as advertised.
- *
  *  COPYRIGHT:
  *
  *  This file is based on similar code found in newlib available
@@ -21,12 +24,10 @@
  *
  *  COPYRIGHT (c) 1994-1997.
  *  On-Line Applications Research Corporation (OAR).
- *
- *  $Id$
  */
 
-#ifndef __OR1K_ASM_h
-#define __OR1K_ASM_h
+#ifndef _RTEMS_ASM_H
+#define _RTEMS_ASM_H
 
 /*
  *  Indicate we are in an assembly file and get the basic CPU definitions.
@@ -35,8 +36,9 @@
 #ifndef ASM
 #define ASM
 #endif
-#include <rtems/score/targopts.h>
-#include <rtems/score/or1k.h>
+
+#include <rtems/score/cpuopts.h>
+#include <rtems/score/cpu.h>
 
 /*
  *  Recent versions of GNU cpp define variables which indicate the
@@ -53,10 +55,13 @@
 #define __REGISTER_PREFIX__
 #endif
 
-/* ANSI concatenation macros.  */
+#include <rtems/concat.h>
 
-#define CONCAT1(a, b) CONCAT2(a, b)
-#define CONCAT2(a, b) a ## b
+#define SYM(x) CONCAT0 (__USER_LABEL_PREFIX__, x)
+
+/* Use the right prefix for registers.  */
+
+#define REG(x) CONCAT0 (__REGISTER_PREFIX__, x)
 
 /* Use the right prefix for global labels.  */
 
