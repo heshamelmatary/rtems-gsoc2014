@@ -21,6 +21,10 @@ extern "C" {
 #define TESTS_USE_PRINTK
 #endif
 
+#if defined(__OR1K__)
+#define TESTS_USE_PRINTK
+#endif
+
 /*
  *  USE PRINTK TO MINIMIZE SIZE
  */
