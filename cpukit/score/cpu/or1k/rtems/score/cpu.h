@@ -531,15 +531,6 @@ typedef enum {
 #define CPU_MPCI_RECEIVE_SERVER_EXTRA_STACK 0
 
 /*
- *  This defines the number of entries in the ISR_Vector_table managed
- *  by RTEMS.
- *
- */
-
-#define CPU_INTERRUPT_NUMBER_OF_VECTORS  16
-#define CPU_INTERRUPT_MAXIMUM_VECTOR_NUMBER  (CPU_INTERRUPT_NUMBER_OF_VECTORS - 1)
-
-/*
  *  Should be large enough to run all RTEMS tests.  This insures
  *  that a "reasonable" small application should not have any problems.
  *
