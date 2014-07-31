@@ -34,7 +34,6 @@ static void or1ksim_clock_at_tick(void)
     
   asm volatile ("l.mtspr r0,r0,0x5001;");
     
-   return 0;
 }
 
 static void or1ksim_clock_handler_install(void)
@@ -78,6 +77,7 @@ static void or1ksim_clock_initialize(void)
     "l.ori %0,%1,0x7;"
     "l.mtspr r0,%1,0x11\n\t": "=r" (sr): "r" (sr));
     );
+
  }
  
  static void or1ksim_clock_cleanup(void)
@@ -90,7 +90,7 @@ static void or1ksim_clock_initialize(void)
  */
 static uint32_t or1ksim_clock_nanoseconds_since_last_tick(void)
 {
-  return (uint32_t) 12345;
+  return (uint32_t) 100000000UL;
 }
 
 #define Clock_driver_support_at_tick() or1ksim_clock_at_tick()

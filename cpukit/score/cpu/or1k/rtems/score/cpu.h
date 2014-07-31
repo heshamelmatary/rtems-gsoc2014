@@ -653,7 +653,6 @@ static inline uint32_t or1k_interrupt_disable( void )
     : "memory"  
   ); 
     
-  return 1;
 }
 
 static inline void or1k_interrupt_enable(uint32_t level)
@@ -669,12 +668,16 @@ static inline void or1k_interrupt_enable(uint32_t level)
   
    //level = (level > 0) 1<<2 : 0; 
    
-  __asm__ volatile(           
-    "l.mfspr %0,r0,17;"      
-    "l.ori   %0,%0,0x7;"     
-    "l.mtspr r0,%0,17;"  
-    : "=r" (sr)  
-    :: "memory"
+  /* If level is > 0, interrupts are already disabled and it could not
+   * be enabled until level = 0 
+   */
+
+    __asm__ volatile(           
+      "l.mfspr %0,r0,17;"      
+      "l.ori   %0,%0,0x7;"     
+      "l.mtspr r0,%0,17;"  
+      : "=r" (sr)  
+      :: "memory"
   );
 
 }
