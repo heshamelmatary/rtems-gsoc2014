@@ -88,6 +88,9 @@ libbsp_a_SOURCES += ../../shared/console_write.c
 libbsp_a_SOURCES += console/console-config.c
 libbsp_a_SOURCES += console/uart.c
 
+# Timer
+libbsp_a_SOURCES += timer/timer.c
+
 # clock
 libbsp_a_SOURCES += clock/clockdrv.c ../../../shared/clockdrv_shell.h
 
