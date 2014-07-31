@@ -133,6 +133,7 @@ exception_frame_restore:
   l.lwz  r6,  24(r1)
   l.lwz  r7,  28(r1)
   l.lwz  r8,  32(r1)
+  l.lwz  r9,  36(r1)
   l.lwz  r10, 40(r1)
   l.lwz  r11, 44(r1)
   l.lwz  r12, 48(r1)
@@ -163,8 +164,8 @@ exception_frame_restore:
   l.movhi r3, hi(_Per_CPU_Information + 8)
   l.ori   r3, r3, lo(_Per_CPU_Information + 8)
   l.lwz   r31, 0(r3)
-  l.sfles r31, r0 
-  l.lwz  r31, 124(r1)
+  l.sfgtu r31, r0 
+  l.lwz   r31, 124(r1)
   l.bf    _ISR_Dispatch /* Thread dispatch necessary */
   l.nop 
   
@@ -199,7 +200,9 @@ SYM (_ISR_Dispatch):
   l.sw  112(r1),r28
   l.sw  120(r1),r30
   
-  l.jal _Thread_Dispatch
+  l.movhi r13, hi(_Thread_Dispatch)
+  l.ori   r13, r13, lo(_Thread_Dispatch)
+  l.jalr  r13
   l.nop
   
   /* Exception level related registers */
