@@ -96,7 +96,6 @@ exception_frame_restore:
   l.lwz  r29, 116(r1)
   l.lwz  r30, 120(r1)
   l.lwz  r31, 124(r1)
-  l.lwz  r1, 4(r1)
   l.addi r1, r1, 128
  
   l.jr   r9

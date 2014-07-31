@@ -25,7 +25,7 @@ bsp_processor_count = DEFINED (bsp_processor_count) ? bsp_processor_count : 1;
 MEMORY
   {
       VECTOR_RAM     (AIW) : ORIGIN = 0x0       , LENGTH = 8260
-      RAM   : org = 0x00002044, l = 0x00800000
+      RAM   : org = 0x00002048, l = 0x00080000
       UNEXPECTED_SECTIONS : ORIGIN = 0xffffffff, LENGTH = 0
   }
 

@@ -15,7 +15,7 @@
   l.nop; \
   l.lwz  r3, lo(bsp_start_vector_table_begin)(r0);\
   l.rfe;\
-  l.nop ; 
+  l.nop
 
   /*l.sw   lo(bsp_start_vector_table_begin)(r0), r13; \
   l.ori  r13, r0, lo(bsp_start_vector_table_begin + ((vector) * 4)); \
@@ -158,9 +158,9 @@ bsp_start_vector_table_begin:
 
 bsp_start_vector_table_end:
 
-.type _start,@function
-
   .section  ".bsp_start_text", "ax"
+  .type _start,@function
+
 _start:
   /* Set SP register to SP mode */
   l.ori  r1,r0,0x1
