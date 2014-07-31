@@ -36,13 +36,14 @@ static void or1ksim_clock_at_tick(void)
     
 }
 
-static void or1ksim_clock_handler_install(void)
+static void or1ksim_clock_handler_install(proc_ptr new_isr, proc_ptr old_isr)
 {
   rtems_status_code sc = RTEMS_SUCCESSFUL;
-  /* FIXME:
-   Currently clock interrupt handler is statically
-   installed at start.S 
-   */ 
+  
+  _CPU_ISR_install_vector(OR1K_EXCEPTION_TICK_TIMER,
+                          new_isr,
+                          NULL);
+
   if (sc != RTEMS_SUCCESSFUL) {
     rtems_fatal_error_occurred(0xdeadbeef);
   }
@@ -58,18 +59,16 @@ static void or1ksim_clock_initialize(void)
  
   /* Set timer contents to restart mode */
   TTMR = 0x600FFED9;
+  
    asm volatile (  
     "l.mtspr r0,%0,0x5000;" /* load TTMR register */
     :: "r" (TTMR): "memory"
     );
     
     asm volatile ("l.mtspr r0,r0,0x5001;");
-    
-    asm volatile (
-    "l.ori %0,%1,0x7;"
-    "l.mtspr r0,%1,0x11\n\t": "=r" (sr): "r" (sr));
-    );
-
+   
+   /* Enable ISR */
+    _ISR_Enable( level );
  }
  
  static void or1ksim_clock_cleanup(void)
@@ -91,7 +90,7 @@ static uint32_t or1ksim_clock_nanoseconds_since_last_tick(void)
 
 #define Clock_driver_support_install_isr(isr, old_isr) \
   do {                                                 \
-    or1ksim_clock_handler_install();               \
+    or1ksim_clock_handler_install(isr, old_isr);               \
     old_isr = NULL;                                    \
   } while (0)
 
