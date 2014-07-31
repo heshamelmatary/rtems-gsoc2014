@@ -12,9 +12,21 @@
   l.sw   lo(bsp_start_vector_table_begin)(r0), r13; \
   l.ori  r13, r0, lo(bsp_start_vector_table_begin + ((vector) * 4)); \
   l.lwz  r13, 0(r13); \
-  l.jr   r13; \
-  l.lwz  r13, lo(bsp_start_vector_table_begin)(r0)
-  l.rfe
+  l.jalr r13; \
+  l.lwz  r13, lo(bsp_start_vector_table_begin)(r0); \
+  l.rfe ; \
+  l.nop ;
+
+
+#define EXCEPTION_SETUP1(vector) \
+  l.sw   lo(bsp_start_vector_table_begin)(r0), r13; \
+  l.addi r3, r0, vector; \
+  l.movhi r13, hi(_OR1K_Exception_Process); \
+  l.ori   r13, r13, lo(_OR1K_Exception_Process); \
+  l.jalr r13; \
+  l.nop
+  l.rfe ; \
+  l.nop ;
 
   .extern bsp_start
   .extern boot_card
@@ -26,6 +38,7 @@
   .extern  bsp_vector_table_size
   .extern  bsp_section_stack_begin 
 
+  .extern _OR1K_Exception_Process
   .extern _OR1K_Exception_default
   .extern rtems_clock_tick
   .extern _exit
@@ -58,21 +71,12 @@ _iPageFaule:
 
 .org 0x500
 _timer:
-  EXCEPTION_SETUP(5)
-  l.nop
-  /*l.addi r1,r0,0x500
-  l.jal  bsp_interrupt_handler_default
-  l.nop
-  
-  l.movhi r13,hi(rtems_clock_tick)
-  l.ori   r13,r13,lo(rtems_clock_tick)
-  l.jalr  r13
+  EXCEPTION_SETUP1(5)
+  /*l.addi r3,r0,5
+  l.jal _OR1K_Exception_Process
   l.rfe
   l.nop
   */
-
-_misaligned:
-  l.nop
 
 .org 0x700
 _undefIns:
