@@ -49,22 +49,14 @@ static void or1ksim_clock_handler_install(void)
 }
 
 static void or1ksim_clock_initialize(void)
-{
- /* Enable Timer interrupt, restart mode, zero counter register*/
-  register uint32_t   sr;
-  register uint32_t   mask;
-
-  asm volatile (
-    "l.mfspr %0,r0,17;"
-	  "l.addi  %1,r0, 0xfffffff9;"
-	  "l.and   %1,%1,%0" : "=r" (sr) : "r" (mask)
-    );
-    
+{ 
+  uint32_t   TTMR;
+  ISR_Level level;
   
    /* Disable ISR */
    _ISR_Disable( level );
  
-  /* Set timer contents to restrt mode */
+  /* Set timer contents to restart mode */
   TTMR = 0x600FFED9;
    asm volatile (  
     "l.mtspr r0,%0,0x5000;" /* load TTMR register */
