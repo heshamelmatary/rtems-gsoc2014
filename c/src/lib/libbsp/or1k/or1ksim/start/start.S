@@ -16,7 +16,7 @@
   l.addi  r3, r0, vector; \
   l.movhi r13, hi(_OR1K_Exception_Process); \
   l.ori   r13, r13, lo (_OR1K_Exception_Process); \
-  l.jr    r13; \ 
+  l.jr    r13; \
   l.nop 
 
   /*l.sw   lo(bsp_start_vector_table_begin)(r0), r13; \
@@ -70,7 +70,8 @@ _reset:
 
 .org 0x200
 _buserr:
-  EXCEPTION_SETUP(2)
+ l.rfe
+ l.nop
 
 .org 0x300
 _dPageFault:

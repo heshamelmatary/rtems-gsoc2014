@@ -38,6 +38,6 @@ void _CPU_Context_Initialize(
   
   context->r1 = stack;
   context->r2 = stack;
-  context->r9 = entry_point;
+  context->r9 = (uint32_t) entry_point;
   context->sr = sr;
 }

@@ -52,8 +52,6 @@ static void uart_set_baud(int baud)
 
   OR1KSIM_REG(OR1KSIM_BSP_UART_REG_LINE_CTRL) &= 
     ~(OR1KSIM_BSP_UART_REG_LINE_CTRL_DLAB);
-   
-   return 0;
 }
 
 static void uart_initialize(int minor)

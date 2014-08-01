@@ -15,40 +15,28 @@
  */
 
 #include <bsp/irq.h>
+#include <bsp/irq-generic.h>
 
-void bsp_interrupt_handler_default(int vector)
+/* Almost all of the jobs that the following functions should 
+ * do are implemented in cpukit 
+ */
+ 
+void bsp_interrupt_handler_default(rtems_vector_number vector)
 {
     printk("spurious interrupt: %u\n", vector);
 }
 
 rtems_status_code bsp_interrupt_facility_initialize()
 {
-
-
+  return 0;
 }
 
-void bsp_interrupt_dispatch()
+rtems_status_code bsp_interrupt_vector_enable(rtems_vector_number vector)
 {
-
+  return 0; 
 }
 
-rtems_status_code bsp_interrupt_vector_enable()
+rtems_status_code bsp_interrupt_vector_disable(rtems_vector_number vector)
 {
-  register uint32_t   sr;
-  
-  /* Enable CPU interrupts */
-  asm volatile (
-    "l.mfspr %0,r0,17;"
-    "l.ori %0,%1,0x7;"
-    "l.mtspr r0,%1,0x11\n\t" : "=r" (sr): "r" (sr)
-    );
-    
-  /* Enable external interrupts */
-  
-  
-}
-
-rtems_status_code bsp_interrupt_vector_disable()
-{
-
+  return 0;
 }

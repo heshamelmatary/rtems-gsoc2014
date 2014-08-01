@@ -73,7 +73,7 @@ static void or1ksim_clock_initialize(void)
  
  static void or1ksim_clock_cleanup(void)
 {
-  return 0;
+
 }
 
 /*

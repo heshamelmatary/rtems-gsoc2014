@@ -694,32 +694,19 @@ static inline uint32_t or1k_interrupt_disable( void )
     : "r" (interrupt_disable_mask)
     : "memory"  
   ); 
-    
+  return sr;
 }
 
 static inline void or1k_interrupt_enable(uint32_t level)
 {
-  uint32_t sr = 0;
+  volatile uint32_t sr;
   
-  /* Currently there are only two interrup level: enable/disable. */
+  sr = level | 0x7; /* Enable interrupts and restore rs */
   
-  /* The following statement maps the level to HW level bit in the 
-   * SR register. If the level > 0 then (should be only 1), then   
-   * interrupts should be enabled.
-   */
-  
-   //level = (level > 0) 1<<2 : 0; 
-   
-  /* If level is > 0, interrupts are already disabled and it could not
-   * be enabled until level = 0 
-   */
-
-    __asm__ volatile(           
-      "l.mfspr %0,r0,17;"      
-      "l.ori   %0,%0,0x7;"     
+    __asm__ volatile(               
       "l.mtspr r0,%0,17;"  
-      : "=r" (sr)  
-      :: "memory"
+      ::"r" (sr)  
+      : "memory"
   );
 
 }
@@ -1195,6 +1182,16 @@ static inline unsigned int CPU_swap_u32(
 
 #define CPU_swap_u16( value ) \
   (((value&0xff) << 8) | ((value >> 8)&0xff))
+  
+typedef uint32_t CPU_Counter_ticks;
+
+CPU_Counter_ticks _CPU_Counter_read( void ); 
+
+CPU_Counter_ticks _CPU_Counter_difference(
+  CPU_Counter_ticks second, 
+  CPU_Counter_ticks first
+);
+
 #endif /* ASM */
 
 #ifdef __cplusplus

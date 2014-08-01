@@ -49,7 +49,7 @@ uint32_t benchmark_timer_read( void )
  delta = clicks - benchmark_timer_base;
   
   /* total in microseconds */
-  total = tick_time * (clicks);
+  total = tick_time * (delta);
   
   if ( benchmark_timer_find_average_overhead == true )
     return total;          /* in nanoseconds microsecond units */
