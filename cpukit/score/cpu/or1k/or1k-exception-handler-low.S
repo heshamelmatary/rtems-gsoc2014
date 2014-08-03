@@ -172,8 +172,7 @@ exception_frame_restore:
   l.addi r1, r1, 140
   
   l.lwz  r3, 0(r1)
-  l.lwz  r13, 4(r1)
-  l.addi r1, r1, 8
+  l.addi r1, r1, 4
   
   l.rfe
   l.nop
@@ -252,8 +251,7 @@ SYM (_ISR_Dispatch):
   l.addi r1, r1, 140
   
   l.lwz  r3, 0(r1)
-  l.lwz  r13, 4(r1)
-  l.addi r1, r1, 8
+  l.addi r1, r1, 4
   
   l.rfe
   l.nop

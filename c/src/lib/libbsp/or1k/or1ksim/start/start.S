@@ -10,22 +10,11 @@
  */
 #define EXCEPTION_SETUP(vector) \
   l.nop   ;\
-  l.addi  r1, r1, -8 ;\
+  l.addi  r1, r1, -4 ;\
   l.sw    0(r1), r3; \
-  l.sw    4(r1), r13; \
   l.addi  r3, r0, vector; \
-  l.movhi r13, hi(_ISR_Handler); \
-  l.ori   r13, r13, lo (_ISR_Handler); \
-  l.jr    r13; \
+  l.j     _ISR_Handler; \
   l.nop 
-
-  /*l.sw   lo(bsp_start_vector_table_begin)(r0), r13; \
-  l.ori  r13, r0, lo(bsp_start_vector_table_begin + ((vector) * 4)); \
-  l.lwz  r13, 0(r13); \
-  l.jalr r13; \
-  l.lwz  r13, lo(bsp_start_vector_table_begin)(r0); \
-  l.rfe ; \
-  */
 
 #define EXCEPTION_SETUP1(vector) \
   l.sw   lo(bsp_start_vector_table_begin)(r0), r13; \
