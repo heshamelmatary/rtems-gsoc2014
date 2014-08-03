@@ -14,8 +14,8 @@
   l.sw    0(r1), r3; \
   l.sw    4(r1), r13; \
   l.addi  r3, r0, vector; \
-  l.movhi r13, hi(_OR1K_Exception_Process); \
-  l.ori   r13, r13, lo (_OR1K_Exception_Process); \
+  l.movhi r13, hi(_ISR_Handler); \
+  l.ori   r13, r13, lo (_ISR_Handler); \
   l.jr    r13; \
   l.nop 
 

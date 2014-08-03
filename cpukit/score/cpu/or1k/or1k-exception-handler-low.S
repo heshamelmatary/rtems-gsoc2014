@@ -24,10 +24,10 @@
 
 .align 4
 .text
-.global _OR1K_Exception_Process 
-.type	  _OR1K_Exception_Process,@function
+.global _ISR_Handler 
+.type	  _ISR_Handler,@function
 
-_OR1K_Exception_Process:
+_ISR_Handler:
   
   l.addi  r1, r1, -140
   /* r3 is saved by exception handler */
