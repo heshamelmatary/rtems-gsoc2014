@@ -94,8 +94,8 @@ static inline void _OR1K_mtspr(uint32_t reg, uint32_t value)
 { 
    __asm__ volatile (
      "l.mtspr  r0, %0, %1;"
-     : "=r" (reg)
-     : "K" (value)
+     : 
+     : "r" (value), "K" (reg)
      : "memory"
    );
 }
