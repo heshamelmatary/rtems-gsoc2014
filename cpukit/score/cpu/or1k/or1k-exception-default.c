@@ -18,9 +18,9 @@ void _OR1K_Exception_default(void);
 
 void _OR1K_Exception_default(void)
 {
-   register CPU_Exception_frame *frame;
+   CPU_Exception_frame *frame;
   
-   __asm__ volatile (
+   asm volatile (
    "l.addi  r1, r1, -%[cpufsz]\n"
    "l.sw  4(r1),r1 \n"
    "l.sw  8(r1),r2 \n"

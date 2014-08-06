@@ -35,23 +35,5 @@ void _CPU_ISR_install_raw_handler(
   proc_ptr   *old_handler
 )
 {
-  /*
-   *  This is where we install the interrupt handler into the "raw" interrupt
-   *  table used by the CPU to dispatch interrupt handlers.
-   */
-   
-  register uint32_t   sr;
-  register uint32_t   mask;
 
-  asm volatile (
-    "l.mfspr %0,r0,17;"
-	  "l.addi  %1,r0, 0xfffffffb;"
-	  "l.and   %1,%1,%0" : "=r" (sr) : "r" (mask));
-	  
-  *old_handler = _ISR_Vector_table[vector]
-  
-  _ISR_Vector_table[ vector ] = new_handler;
-  
-  /* Restore supervision register */
-  asm volatile ("l.mtspr r0,%0,17":: "r" (sr));
 }

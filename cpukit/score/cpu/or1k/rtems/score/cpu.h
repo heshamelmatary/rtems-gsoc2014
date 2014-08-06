@@ -596,8 +596,7 @@ typedef Context_Control CPU_Interrupt_frame;
 
 static inline uint32_t or1k_interrupt_disable( void )
 {
-  volatile uint32_t sr = 0;
-  volatile uint32_t interrupt_disable_mask = 0xFFFFFFFB;
+  uint32_t sr;
   
   sr = _OR1K_mfspr(CPU_OR1K_SR);
   
@@ -606,29 +605,16 @@ static inline uint32_t or1k_interrupt_disable( void )
   
   _OR1K_mtspr(CPU_OR1K_SR, sr);
   
-  /*__asm__ volatile(           
-    "l.mfspr %0,r0,17;"      
-    "l.and   %0,%0,%1;"     
-    "l.mtspr r0,%0,17;"  
-    : "=r" (sr)  
-    : "r" (interrupt_disable_mask)
-    : "memory"  
-  ); */
-  
   return sr;
 }
 
 static inline void or1k_interrupt_enable(uint32_t level)
 {
-  volatile uint32_t sr;
+  uint32_t sr;
   
   sr = level | 0x7; /* Enable interrupts and restore rs */
   
-    __asm__ volatile(               
-      "l.mtspr r0,%0,17;"  
-      ::"r" (sr)  
-      : "memory"
-  );
+  _OR1K_mtspr(CPU_OR1K_SR, sr);
 
 }
 
@@ -942,7 +928,6 @@ typedef struct {
  */
 void _CPU_Exception_frame_print( const CPU_Exception_frame *frame );
 
-//void _OR1K_Exception_default( CPU_Exception_frame *frame )
 
 /* end of Priority handler macros */
 

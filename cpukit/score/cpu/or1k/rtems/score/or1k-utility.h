@@ -15,12 +15,6 @@
  
 #ifndef _RTEMS_SCORE_OR1K_UTILITY_H
 #define _RTEMS_SCORE_OR1K_UTILITY_H
-
-/**
- * @brief Supervision Mode registers definitions.
- *
- * @see OpenRISC architecture manual - revision 0.
- */
  
 /* Supervision Mode Register */
 #define CPU_OR1K_SR 17
@@ -57,7 +51,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
- typedef enum {
+/**
+ * @brief Supervision Mode registers definitions.
+ *
+ * @see OpenRISC architecture manual - revision 0.
+ */
+typedef enum {
   OR1K_EXCEPTION_RESET = 1, 
   OR1K_EXCEPTION_BUS_ERR = 2, 
   OR1K_EXCEPTION_D_PF = 3, /* Data Page Fault */
@@ -83,30 +82,32 @@ static inline uint32_t _OR1K_mfspr(uint32_t reg)
 {
    uint32_t spr_value;
   
-   __asm__ __volatile__ (
-     "l.mfspr  %0, r0, %1"
-     : "=r" (spr_value) : "K" (reg) : "memory");
+   asm volatile (
+     "l.mfspr  %1, r0, 0"
+     : "=r" (spr_value) : "r" (reg));
    
    return spr_value;
 }
 
 static inline void _OR1K_mtspr(uint32_t reg, uint32_t value)
 { 
-   __asm__ volatile (
-     "l.mtspr  r0, %0, %1;"
-     : 
-     : "r" (value), "K" (reg)
-     : "memory"
+   asm volatile (
+     "l.mtspr  %1, %0, 0;"
+     :: "r" (value), "r" (reg)
    );
 }
 
-static inline void _OR1K_Flush_pipeline( void )
+static inline _OR1K_Sync_mem( void )
 {
+  asm volatile("l.msync");
+}
 
+static inline _OR1K_Sync_pipeline( void )
+{
+  asm volatile("l.psync");
 }
 
 #else /* ASM */
-
 
 #endif /* ASM */
 

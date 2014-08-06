@@ -17,6 +17,7 @@
 
 #include <rtems/score/cpu.h>
 #include <rtems/score/interr.h>
+#include <rtems/score/or1k-utility.h>
 
 void _CPU_Context_Initialize(
   Context_Control *context,
@@ -31,8 +32,7 @@ void _CPU_Context_Initialize(
   uint32_t stack = (uint32_t) stack_area_begin;
   register uint32_t sr;
   
-  asm volatile (
-  "l.mfspr %0,r0,17;"  : "=r" (sr));
+  sr = _OR1K_mfspr(CPU_OR1K_SR);
   
   memset(context, 0, sizeof(*context));
   
