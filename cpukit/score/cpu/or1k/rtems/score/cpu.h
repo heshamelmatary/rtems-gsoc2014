@@ -600,10 +600,7 @@ static inline uint32_t or1k_interrupt_disable( void )
   
   sr = _OR1K_mfspr(CPU_OR1K_SR);
   
-  /* Mask interrupts is SR register */
-  sr &= CPU_OR1K_ISR_STATUS_MASK_I_DIS;
-  
-  _OR1K_mtspr(CPU_OR1K_SR, sr);
+  _OR1K_mtspr(CPU_OR1K_SR, (sr & CPU_OR1K_ISR_STATUS_MASK_I_DIS));
   
   return sr;
 }
