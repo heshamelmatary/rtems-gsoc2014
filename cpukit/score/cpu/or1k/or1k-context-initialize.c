@@ -30,9 +30,9 @@ void _CPU_Context_Initialize(
 )
 {
   uint32_t stack = (uint32_t) stack_area_begin;
-  register uint32_t sr;
+  uint32_t sr;
   
-  sr = _OR1K_mfspr(CPU_OR1K_SR);
+  sr = _OR1K_mfspr(CPU_OR1K_SPR_SR);
   
   memset(context, 0, sizeof(*context));
   

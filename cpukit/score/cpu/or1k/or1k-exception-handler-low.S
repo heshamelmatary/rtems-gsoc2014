@@ -21,13 +21,14 @@
 
 #include <rtems/asm.h>
 #include <rtems/score/percpu.h>
+#include "rtems/score/or1k-utility.h"
 
 .align 4
 .text
-.global _ISR_Handler 
+PUBLIC(_ISR_Handler) 
 .type	  _ISR_Handler,@function
 
-_ISR_Handler:
+ SYM(_ISR_Handler):
   
   l.addi  r1, r1, -140
   /* r3 is saved by exception handler */
@@ -79,15 +80,15 @@ _ISR_Handler:
   /* Exception level related registers */
   
   /* EPCR */
-  l.mfspr r13, r0, 32 
+  l.mfspr r13, r0, CPU_OR1K_SPR_EPCR0 
   l.sw  128(r1), r13 /* epcr */
 
   /* EEAR */
-  l.mfspr r13, r0, 48 
+  l.mfspr r13, r0, CPU_OR1K_SPR_EEAR0 
   l.sw  132(r1), r13 /* eear */
   
   /* ESR */
-  l.mfspr r13, r0, 64 
+  l.mfspr r13, r0, CPU_OR1K_SPR_ESR0 
   l.sw  136(r1), r13  /* esr */ 
 
   
@@ -98,21 +99,21 @@ _ISR_Handler:
   l.jalr r3
   l.nop
   
-exception_frame_restore:
+ SYM(exception_frame_restore):
 
   /* Exception level related registers */
   
   /* EPCR */
   l.lwz  r13,  128(r1)
-  l.mtspr r0, r13, 32 
+  l.mtspr r0, r13, CPU_OR1K_SPR_EPCR0 
 
   /* EEAR */
   l.lwz  r13,  132(r1)
-  l.mtspr r0, r13, 48 
+  l.mtspr r0, r13, CPU_OR1K_SPR_EEAR0 
   
   /* ESR */
   l.lwz  r13,  136(r1)
-  l.mtspr r0, r13, 64
+  l.mtspr r0, r13, CPU_OR1K_SPR_ESR0
   
   /* Decrement nesting level */
   l.movhi r6, hi(_Per_CPU_Information + 0)
@@ -157,11 +158,6 @@ exception_frame_restore:
   l.lwz  r29, 116(r1)
   l.lwz  r30, 120(r1)
   
-  /* Enable interrupts */
-  l.mfspr r31, r0, 17
-  l.ori   r31, r31, 0x7
-  l.mtspr r0, r31, 17
-  
   l.movhi r3, hi(_Per_CPU_Information + 8)
   l.ori   r3, r3, lo(_Per_CPU_Information + 8)
   l.lwz   r31, 0(r3)
@@ -178,7 +174,7 @@ exception_frame_restore:
   l.rfe
   l.nop
 
-.global SYM (_ISR_Dispatch)
+PUBLIC(_ISR_Dispatch)
 SYM (_ISR_Dispatch):
 
   l.sw  4(r1),r1
@@ -189,7 +185,7 @@ SYM (_ISR_Dispatch):
   l.sw  28(r1),r7
   l.sw  32(r1),r8
   /* Skip r10 as it's preserved to be used by TLS */
-  /* The following set if registers are preserved across function calls */
+  /* The following set of registers are preserved across function calls */
   l.sw  56(r1),r14
   l.sw  64(r1),r16
   l.sw  72(r1),r18
@@ -209,15 +205,15 @@ SYM (_ISR_Dispatch):
   
   /* EPCR */
   l.lwz  r13,  128(r1)
-  l.mtspr r0, r13, 32 
+  l.mtspr r0, r13, CPU_OR1K_SPR_EPCR0 
 
   /* EEAR */
   l.lwz  r13,  132(r1)
-  l.mtspr r0, r13, 48 
+  l.mtspr r0, r13, CPU_OR1K_SPR_EEAR0 
   
   /* ESR */
   l.lwz  r13,  136(r1)
-  l.mtspr r0, r13, 64
+  l.mtspr r0, r13, CPU_OR1K_SPR_ESR0
   
   l.lwz  r1,  4(r1)
   l.lwz  r2,  8(r1)

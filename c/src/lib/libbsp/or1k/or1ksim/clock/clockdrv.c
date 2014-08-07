@@ -52,11 +52,8 @@ static void or1ksim_clock_handler_install(proc_ptr new_isr, proc_ptr old_isr)
 
 static void or1ksim_clock_initialize(void)
 { 
-  uint32_t   TTMR;
-  ISR_Level level;
-  
-   /* Disable ISR */
-   _ISR_Disable( level );
+  uint32_t TTMR;
+  uint32_t sr;
  
   /* Set timer contents to restart mode */
   TTMR = 0x600FFED9;
@@ -68,8 +65,10 @@ static void or1ksim_clock_initialize(void)
     
     asm volatile ("l.mtspr r0,r0,0x5001;");
    
-   /* Enable ISR */
-    _ISR_Enable( level );
+   /* Enable tick timer */
+   sr = _OR1K_mfspr(CPU_OR1K_SPR_SR);
+   sr |= CPU_OR1K_SPR_SR_TEE;
+   _OR1K_mtspr(CPU_OR1K_SPR_SR, sr);
  }
  
  static void or1ksim_clock_cleanup(void)
@@ -82,7 +81,7 @@ static void or1ksim_clock_initialize(void)
  */
 static uint32_t or1ksim_clock_nanoseconds_since_last_tick(void)
 {
-  return (uint32_t) 100000000UL;
+  return (uint32_t) 400000000UL;
 }
 
 #define Clock_driver_support_at_tick() or1ksim_clock_at_tick()

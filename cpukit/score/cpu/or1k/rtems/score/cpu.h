@@ -596,22 +596,22 @@ typedef Context_Control CPU_Interrupt_frame;
 
 static inline uint32_t or1k_interrupt_disable( void )
 {
-  uint32_t sr;
+  volatile uint32_t sr;
   
-  sr = _OR1K_mfspr(CPU_OR1K_SR);
+  sr = _OR1K_mfspr(CPU_OR1K_SPR_SR);
   
-  _OR1K_mtspr(CPU_OR1K_SR, (sr & CPU_OR1K_ISR_STATUS_MASK_I_DIS));
+  _OR1K_mtspr(CPU_OR1K_SPR_SR, (sr & CPU_OR1K_ISR_STATUS_MASK_I_DIS));
   
   return sr;
 }
 
 static inline void or1k_interrupt_enable(uint32_t level)
 {
-  uint32_t sr;
+  volatile uint32_t sr;
   
-  sr = level | 0x7; /* Enable interrupts and restore rs */
-  
-  _OR1K_mtspr(CPU_OR1K_SR, sr);
+  /* Enable interrupts and restore rs */
+  sr = level | CPU_OR1K_SPR_SR_IEE | CPU_OR1K_SPR_SR_TEE; 
+  _OR1K_mtspr(CPU_OR1K_SPR_SR, sr);
 
 }
 

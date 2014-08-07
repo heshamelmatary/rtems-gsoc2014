@@ -14,14 +14,18 @@
   #include "config.h"
 #endif
 
-.text
-.align 2
-.global _CPU_Context_switch
-.global _CPU_Context_restore
-.global _CPU_Context_restore_fp
-.global _CPU_Context_save_fp
+#include <rtems/asm.h>
+#include "rtems/score/or1k-utility.h"
 
-_CPU_Context_switch:
+.text
+.align 4
+
+PUBLIC(_CPU_Context_switch)
+PUBLIC(_CPU_Context_restore)
+PUBLIC(_CPU_Context_restore_fp)
+PUBLIC(_CPU_Context_save_fp)
+
+SYM(_CPU_Context_switch):
   l.sw  0(r3),r1
   l.sw  4(r3),r2
   l.sw  8(r3),r3  
@@ -44,38 +48,38 @@ _CPU_Context_switch:
   l.sw  116(r3),r30
   
   /* Supervision Register */
-  l.mfspr r13,r0,17  
+  l.mfspr r13,r0, CPU_OR1K_SPR_SR  
   l.sw  124(r3),r13
   
   /* EPCR */
-  l.mfspr r13, r0, 32 
+  l.mfspr r13, r0, CPU_OR1K_SPR_EPCR0 
   l.sw  128(r3), r13 /* epcr */
 
   /* EEAR */
-  l.mfspr r13, r0, 48 
+  l.mfspr r13, r0, CPU_OR1K_SPR_EEAR0 
   l.sw  132(r3), r13 /* eear */
   
   /* ESR */
-  l.mfspr r13, r0, 64 
+  l.mfspr r13, r0, CPU_OR1K_SPR_ESR0 
   l.sw  136(r3), r13  /* esr */
   
-restore:
+SYM(restore):
   l.lwz   r13,124(r4)
-  l.mtspr r0,r13,17
+  l.mtspr r0,r13, CPU_OR1K_SPR_SR
   
   /* Exception level related registers */
   
   /* EPCR */
   l.lwz  r13,  128(r4)
-  l.mtspr r0, r13, 32 
+  l.mtspr r0, r13, CPU_OR1K_SPR_EPCR0 
 
   /* EEAR */
   l.lwz  r13,  132(r4)
-  l.mtspr r0, r13, 48 
+  l.mtspr r0, r13, CPU_OR1K_SPR_EEAR0 
   
   /* ESR */
   l.lwz  r13,  136(r4)
-  l.mtspr r0, r13, 64
+  l.mtspr r0, r13, CPU_OR1K_SPR_ESR0
   
   l.lwz  r1,0(r4)
   l.lwz  r2,4(r4)
@@ -101,15 +105,15 @@ restore:
   l.jr   r9
   l.nop
   
- _CPU_Context_restore:
+ SYM(_CPU_Context_restore):
   l.add   r4,r3,r0
   l.add   r13,r0,r0
   l.j     restore
   l.nop
   
- _CPU_Context_restore_fp:
+ SYM(_CPU_Context_restore_fp):
   l.nop
   
- _CPU_Context_save_fp:
+ SYM(_CPU_Context_save_fp):
   l.nop
   
