@@ -37,6 +37,15 @@ PUBLIC(_ISR_Handler)
   l.sw  20(r1),r5
   l.sw  24(r1),r6
   
+  /* Save interrupted task stack pointer */
+  l.addi r4, r1, 144
+  l.sw   4(r1), r4
+  
+  /* Save interrupted task r3 (first arg) value */
+  l.addi r4, r1, 140
+  l.lwz  r4, 0(r4)
+  l.sw  12(r1), r4
+  
   /* Increment nesting level */
   l.movhi r6, hi(ISR_NEST_LEVEL)
   l.ori   r6, r6, lo(ISR_NEST_LEVEL)
@@ -93,6 +102,8 @@ PUBLIC(_ISR_Handler)
   l.mfspr r13, r0, CPU_OR1K_SPR_ESR0 
   l.sw  136(r1), r13  /* esr */ 
 
+  /* Keep r1 (Exception frame address) in r14 */
+  l.add   r14, r1, r0
   
   /* Call the exception handler from vector table */
   
@@ -104,11 +115,19 @@ PUBLIC(_ISR_Handler)
   l.slli r13, r13, 2
   l.addi r13, r13, lo(bsp_start_vector_table_begin)
   l.lwz  r13, 0(r13)
+  
+   /* Switch to RTEMS dedicated interrupt stack */
+  l.movhi r1, hi(INTERRUPT_STACK_HIGH)
+  l.ori   r1, r1, lo(INTERRUPT_STACK_HIGH)
+  l.lwz   r1, 0(r1)
+  
   l.jalr r13
   l.nop
   
  SYM(exception_frame_restore):
 
+  l.add r1, r14, r0
+  
   /* Exception level related registers */
   
   /* EPCR */
@@ -167,9 +186,9 @@ PUBLIC(_ISR_Handler)
   l.lwz  r29, 116(r1)
   l.lwz  r30, 120(r1)
   
-  l.movhi r3, hi(DISPATCH_NEEDED)
-  l.ori   r3, r3, lo(DISPATCH_NEEDED)
-  l.lwz   r31, 0(r3)
+  l.movhi r31, hi(DISPATCH_NEEDED)
+  l.ori   r31, r3, lo(DISPATCH_NEEDED)
+  l.lwz   r31, 0(r31)
   l.sfgtu r31, r0 
   l.lwz   r31, 124(r1)
   l.bf    _ISR_Dispatch /* Thread dispatch necessary */
@@ -226,7 +245,8 @@ SYM (_ISR_Dispatch):
   
   l.lwz  r1,  4(r1)
   l.lwz  r2,  8(r1)
-  l.lwz  r3,  16(r1)
+  l.lwz  r4,  12(r1)
+  l.lwz  r4,  16(r1)
   l.lwz  r5,  20(r1)
   l.lwz  r6,  24(r1)
   l.lwz  r7,  28(r1)

@@ -101,16 +101,12 @@ extern "C" {
  *  is unclear what that would imply about the interrupt processing
  *  procedure on that CPU.
  *
- *  For the first cut of an Or1k implementation, let's not worry
- *  about this, and assume that our C code will autoperform any
- *  frame/stack allocation for us when the procedure is entered.
- *  If we write assembly code, we may have to deal with this manually.
- *  This can be changed later if we find it is impossible. This
- *  behavior is desireable as it allows us to work in low memory
- *  environments where we don't have room for a dedicated stack.
+ *  Currently, for or1k port, _ISR_Handler is responsible for switching to
+ *  RTEMS dedicated interrupt task.
+ *
  */
 
-#define CPU_HAS_SOFTWARE_INTERRUPT_STACK FALSE
+#define CPU_HAS_SOFTWARE_INTERRUPT_STACK TRUE
 
 /*
  *  Does this CPU have hardware support for a dedicated interrupt stack?
@@ -141,7 +137,7 @@ extern "C" {
  *
  */
 
-#define CPU_ALLOCATE_INTERRUPT_STACK FALSE
+#define CPU_ALLOCATE_INTERRUPT_STACK TRUE
 
 /*
  *  Does the RTEMS invoke the user's ISR with the vector number and
@@ -150,7 +146,7 @@ extern "C" {
  *
  */
 
-#define CPU_ISR_PASSES_FRAME_POINTER 0
+#define CPU_ISR_PASSES_FRAME_POINTER 1
 
 /*
  *  Does the CPU have hardware floating point?

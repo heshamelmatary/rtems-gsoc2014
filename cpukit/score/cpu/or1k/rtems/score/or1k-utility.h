@@ -101,6 +101,9 @@
 #define CPU_OR1K_SPR_ESR14    (SPR_GRP0_SYS_CTRL + 78)
 #define CPU_OR1K_SPR_ESR15    (SPR_GRP0_SYS_CTRL + 79)
 
+/* Shadow registers base */
+#define CPU_OR1K_SPR_GPR32    (SPR_GRP0_SYS_CTRL + 1024)
+
 /* Group1: Data MMU registers */
 #define CPU_OR1K_SPR_DMMUCR   (SPR_GRP1_DMMU + 0)
 #define CPU_OR1K_SPR_DMMUPR   (SPR_GRP1_DMMU + 1)
