@@ -28,11 +28,11 @@ extern "C" {
 #endif
 
 
-#include "rtems/score/or1k.h"            /* pick up machine definitions */
-#include "rtems/score/or1k-utility.h"
+#include <rtems/score/or1k.h>            /* pick up machine definitions */
+#include <rtems/score/or1k-utility.h>
+#include <rtems/score/types.h>
 #ifndef ASM
 #include <stdint.h>
-#include "rtems/score/types.h"
 #endif
 
 /* conditional compilation parameters */

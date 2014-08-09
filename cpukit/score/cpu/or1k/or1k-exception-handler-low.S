@@ -31,20 +31,22 @@ PUBLIC(_ISR_Handler)
  SYM(_ISR_Handler):
   
   l.addi  r1, r1, -140
-  /* r3 is saved by exception handler */
+  
+  /* r3 is saved by BSP exception handler */
+  l.sw  16(r1),r4
   l.sw  20(r1),r5
   l.sw  24(r1),r6
   
   /* Increment nesting level */
-  l.movhi r6, hi(_Per_CPU_Information + 0)
-  l.ori   r6, r6, lo(_Per_CPU_Information + 0)
+  l.movhi r6, hi(ISR_NEST_LEVEL)
+  l.ori   r6, r6, lo(ISR_NEST_LEVEL)
   l.lwz   r5, 0(r6)
   l.addi  r5, r5, 1
   l.sw    0(r6), r5
   
   /* Disable multitasking */
-  l.movhi r6, hi(_Per_CPU_Information + 4)
-  l.ori   r6, r6, lo(_Per_CPU_Information + 4)
+  l.movhi r6, hi(THREAD_DISPATCH_DISABLE_LEVEL)
+  l.ori   r6, r6, lo(THREAD_DISPATCH_DISABLE_LEVEL)
   l.lwz   r5, 0(r6)
   l.addi  r5, r5, 1
   l.sw    0(r6), r5
@@ -93,10 +95,16 @@ PUBLIC(_ISR_Handler)
 
   
   /* Call the exception handler from vector table */
-  l.slli r3, r3, 2
-  l.addi r3, r3, lo(bsp_start_vector_table_begin)
-  l.lwz  r3, 0(r3)
-  l.jalr r3
+  
+  /* First function arg for C handler is vector number,
+   * and the second is a pointer to exception frame. 
+   */
+  l.add  r13, r3, r0 
+  l.add  r4, r1, r0
+  l.slli r13, r13, 2
+  l.addi r13, r13, lo(bsp_start_vector_table_begin)
+  l.lwz  r13, 0(r13)
+  l.jalr r13
   l.nop
   
  SYM(exception_frame_restore):
@@ -116,21 +124,22 @@ PUBLIC(_ISR_Handler)
   l.mtspr r0, r13, CPU_OR1K_SPR_ESR0
   
   /* Decrement nesting level */
-  l.movhi r6, hi(_Per_CPU_Information + 0)
-  l.ori   r6, r6, lo(_Per_CPU_Information + 0)
+  l.movhi r6, hi(ISR_NEST_LEVEL)
+  l.ori   r6, r6, lo(ISR_NEST_LEVEL)
   l.lwz   r5, 0(r6)
   l.addi  r5, r5, -1
   l.sw    0(r6), r5
   
   /* Enable multitasking */
-  l.movhi r6, hi(_Per_CPU_Information + 4)
-  l.ori   r6, r6, lo(_Per_CPU_Information + 4)
+  l.movhi r6, hi(THREAD_DISPATCH_DISABLE_LEVEL)
+  l.ori   r6, r6, lo(THREAD_DISPATCH_DISABLE_LEVEL)
   l.lwz   r5, 0(r6)
   l.addi  r5, r5, -1
   l.sw    0(r6), r5
   
   l.lwz  r2,  8(r1)
   l.lwz  r3,  12(r1)
+  l.lwz  r4,  16(r1)
   l.lwz  r5,  20(r1)
   l.lwz  r6,  24(r1)
   l.lwz  r7,  28(r1)
@@ -158,8 +167,8 @@ PUBLIC(_ISR_Handler)
   l.lwz  r29, 116(r1)
   l.lwz  r30, 120(r1)
   
-  l.movhi r3, hi(_Per_CPU_Information + 8)
-  l.ori   r3, r3, lo(_Per_CPU_Information + 8)
+  l.movhi r3, hi(DISPATCH_NEEDED)
+  l.ori   r3, r3, lo(DISPATCH_NEEDED)
   l.lwz   r31, 0(r3)
   l.sfgtu r31, r0 
   l.lwz   r31, 124(r1)
@@ -217,6 +226,7 @@ SYM (_ISR_Dispatch):
   
   l.lwz  r1,  4(r1)
   l.lwz  r2,  8(r1)
+  l.lwz  r3,  16(r1)
   l.lwz  r5,  20(r1)
   l.lwz  r6,  24(r1)
   l.lwz  r7,  28(r1)
