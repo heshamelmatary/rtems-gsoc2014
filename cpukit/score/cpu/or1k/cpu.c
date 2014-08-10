@@ -1,7 +1,7 @@
 /*
- *  Opencore Or1k CPU Dependent Source
+ *  Opencore OR1K CPU Dependent Source
  *
- *
+ *  COPYRIGHT (c) 2014 Hesham ALMatary <heshamelmatary@gmail.com>
  *  COPYRIGHT (c) 1989-1999.
  *  On-Line Applications Research Corporation (OAR).
  *
@@ -9,9 +9,6 @@
  *  found in the file LICENSE in this distribution or at
  *  http://www.rtems.com/license/LICENSE.
  *
- *  This file adapted from no_bsp board library of the RTEMS distribution.
- *  The body has been modified for the Bender Or1k implementation by
- *  Chris Ziomkowski. <chris@asics.ws>
  */
 
 #include <rtems/system.h>

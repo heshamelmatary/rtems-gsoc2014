@@ -8,7 +8,7 @@
  *  This include file contains type definitions pertaining to the
  *  arm processor family.
  *
- *  COPYRIGHT (c) 2014 Hesham ALMatary
+ *  COPYRIGHT (c) 2014 Hesham ALMatary <heshamelmatary@gmail.com>
  *
  *  The license and distribution terms for this file may be
  *  found in the file LICENSE in this distribution or at

@@ -1,9 +1,5 @@
 /*
- * Copyright (c) 2014 Hesham ALMatary
- *
- *
- *  Derived from no_cpu/cpu_asm.S, copyright (c) 1989-1999,
- *  On-Line Applications Research Corporation (OAR).
+ * COPYRIGHT (c) 2014 Hesham ALMatary <heshamelmatary@gmail.com>
  *
  * The license and distribution terms for this file may be
  * found in the file LICENSE in this distribution or at

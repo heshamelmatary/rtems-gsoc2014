@@ -4,9 +4,7 @@
  * @brief OR1K utility
  */
 /*
- *  Copyright (c) 2014 Hesham ALMatary
- *
- *  <rtems@embedded-brains.de>
+ * COPYRIGHT (c) 2014 Hesham ALMatary <heshamelmatary@gmail.com>
  *
  * The license and distribution terms for this file may be
  * found in the file LICENSE in this distribution or at

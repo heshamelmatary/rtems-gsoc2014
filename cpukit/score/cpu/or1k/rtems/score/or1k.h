@@ -5,7 +5,7 @@
 /*
  *  This file contains information pertaining to the OR1K processor.
  *
- *  COPYRIGHT (c) 2014 Hesham ALMatary
+ *  COPYRIGHT (c) 2014 Hesham ALMatary <heshamelmatary@gmail.com>
  *
  *  Based on code with the following copyright...
  *  COPYRIGHT (c) 1989-1999, 2010.

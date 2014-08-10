@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014 Hesham ALMatary
+ * COPYRIGHT (c) 2014 Hesham ALMatary <heshamelmatary@gmail.com>
  *
  * COPYRIGHT (c) 1989-2006
  * On-Line Applications Research Corporation (OAR).

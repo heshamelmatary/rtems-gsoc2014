@@ -6,7 +6,7 @@
  *  This include file contains macros pertaining to the Opencores
  *  or1k processor family.
  *
- *  COPYRIGHT (c) 2014 Hesham ALMatary
+ *  COPYRIGHT (c) 2014 Hesham ALMatary <heshamelmatary@gmail.com>
  *  COPYRIGHT (c) 1989-1999.
  *  On-Line Applications Research Corporation (OAR).
  *
