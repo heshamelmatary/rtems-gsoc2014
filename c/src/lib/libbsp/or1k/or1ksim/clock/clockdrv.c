@@ -27,14 +27,8 @@
 
 static void or1ksim_clock_at_tick(void)
 {
-  uint32_t TTMR = 0x600FFED9;
-  asm volatile (  
-    "l.mtspr r0,%0,0x5000;" /* load TTMR register */
-    ::"r" (TTMR): "memory"
-    );
-    
-  asm volatile ("l.mtspr r0,r0,0x5001;");
-    
+  _OR1K_mtspr(CPU_OR1K_SPR_TTMR, 0x600FFED9);
+  _OR1K_mtspr(CPU_OR1K_SPR_TTCR, 0); 
 }
 
 static void or1ksim_clock_handler_install(proc_ptr new_isr, proc_ptr old_isr)
@@ -52,24 +46,17 @@ static void or1ksim_clock_handler_install(proc_ptr new_isr, proc_ptr old_isr)
 
 static void or1ksim_clock_initialize(void)
 { 
-  uint32_t TTMR;
   uint32_t sr;
  
   /* Set timer contents to restart mode */
-  TTMR = 0x600FFED9;
-  
-   asm volatile (  
-    "l.mtspr r0,%0,0x5000;" /* load TTMR register */
-    :: "r" (TTMR): "memory"
-    );
-    
-    asm volatile ("l.mtspr r0,r0,0x5001;");
+  _OR1K_mtspr(CPU_OR1K_SPR_TTMR, 0x600FFED9);
+  _OR1K_mtspr(CPU_OR1K_SPR_TTCR, 0);
    
    /* Enable tick timer */
-   sr = _OR1K_mfspr(CPU_OR1K_SPR_SR);
-   sr |= CPU_OR1K_SPR_SR_TEE;
-   _OR1K_mtspr(CPU_OR1K_SPR_SR, sr);
- }
+  sr = _OR1K_mfspr(CPU_OR1K_SPR_SR);
+  sr |= CPU_OR1K_SPR_SR_TEE;
+  _OR1K_mtspr(CPU_OR1K_SPR_SR, sr);
+}
  
  static void or1ksim_clock_cleanup(void)
 {
