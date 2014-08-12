@@ -16,16 +16,6 @@
   l.j     _ISR_Handler; \
   l.nop 
 
-#define EXCEPTION_SETUP1(vector) \
-  l.sw   lo(bsp_start_vector_table_begin)(r0), r13; \
-  l.addi r3, r0, vector; \
-  l.movhi r13, hi(_OR1K_Exception_Process); \
-  l.ori   r13, r13, lo(_OR1K_Exception_Process); \
-  l.jalr r13; \
-  l.nop
-  l.rfe ; \
-  l.nop ;
-
   .extern bsp_start
   .extern boot_card
   .extern bsp_section_bss_begin

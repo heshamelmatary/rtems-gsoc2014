@@ -43,13 +43,11 @@ inline void _CPU_ISR_Set_level(uint32_t level)
   
   sr = _OR1K_mfspr(CPU_OR1K_SPR_SR);
   
-  if (level == 0) /* Enable all interrupts */
-  {
+  if (level == 0){ /* Enable all interrupts */
     sr |= CPU_OR1K_SPR_SR_IEE | CPU_OR1K_SPR_SR_TEE;
-  }
-  else
-  {
-    sr &= CPU_OR1K_ISR_STATUS_MASK_I_DIS;
+  
+  } else{
+    sr &= ~CPU_OR1K_SPR_SR_IEE;
   } 
   
   _OR1K_mtspr(CPU_OR1K_SPR_SR, sr);
@@ -70,7 +68,6 @@ void _CPU_ISR_install_raw_handler(
   proc_ptr   *old_handler
 )
 {
-
 }
 
 void _CPU_ISR_install_vector(
@@ -79,7 +76,7 @@ void _CPU_ISR_install_vector(
   proc_ptr   *old_handler
 )
 {
-   volatile proc_ptr *table = 
+   proc_ptr *table = 
      (proc_ptr *) bsp_start_vector_table_begin;
    proc_ptr current_handler;
    
@@ -106,15 +103,7 @@ void _CPU_Install_interrupt_stack( void )
 {
 }
 
-void _CPU_Context_Initialize_fp(
-  void **fp_context_ptr
-)
-{
-}
-
 void _CPU_Thread_Idle_body( void )
 {
-
-  for( ; ; );
-    /* insert your "halt" instruction here */
+     _OR1K_CPU_Sleep();
 }

@@ -124,9 +124,23 @@ PUBLIC(_ISR_Handler)
   l.jalr r13
   l.nop
   
- SYM(exception_frame_restore):
-
+  /* Switch back to the interrupted task stack */
   l.add r1, r14, r0
+  
+  /* Check if dispatch needed */
+  l.movhi r31, hi(DISPATCH_NEEDED)
+  l.ori   r31, r31, lo(DISPATCH_NEEDED)
+  l.lwz   r31, 0(r31)
+  l.sfeq  r31, r0 
+  l.bf    exception_frame_restore
+  l.nop 
+  
+  l.movhi r13, hi(_Thread_Dispatch)
+  l.ori   r13, r13, lo(_Thread_Dispatch)
+  l.jalr  r13
+  l.nop
+   
+ SYM(exception_frame_restore):
   
   /* Exception level related registers */
   
@@ -186,98 +200,8 @@ PUBLIC(_ISR_Handler)
   l.lwz  r29, 116(r1)
   l.lwz  r30, 120(r1)
   
-  l.movhi r31, hi(DISPATCH_NEEDED)
-  l.ori   r31, r3, lo(DISPATCH_NEEDED)
-  l.lwz   r31, 0(r31)
-  l.sfgtu r31, r0 
-  l.lwz   r31, 124(r1)
-  l.bf    _ISR_Dispatch /* Thread dispatch necessary */
-  l.nop 
-  
   l.addi r1, r1, 140
   
-  l.lwz  r3, 0(r1)
-  l.addi r1, r1, 4
-  
-  l.rfe
-  l.nop
-
-PUBLIC(_ISR_Dispatch)
-SYM (_ISR_Dispatch):
-
-  l.sw  4(r1),r1
-  l.sw  8(r1),r2
-  l.sw  16(r1),r4 
-  l.sw  20(r1),r5
-  l.sw  24(r1),r6
-  l.sw  28(r1),r7
-  l.sw  32(r1),r8
-  /* Skip r10 as it's preserved to be used by TLS */
-  /* The following set of registers are preserved across function calls */
-  l.sw  56(r1),r14
-  l.sw  64(r1),r16
-  l.sw  72(r1),r18
-  l.sw  80(r1),r20
-  l.sw  88(r1),r22
-  l.sw  96(r1),r24
-  l.sw  104(r1),r26
-  l.sw  112(r1),r28
-  l.sw  120(r1),r30
-  
-  l.movhi r13, hi(_Thread_Dispatch)
-  l.ori   r13, r13, lo(_Thread_Dispatch)
-  l.jalr  r13
-  l.nop
-  
-  /* Exception level related registers */
-  
-  /* EPCR */
-  l.lwz  r13,  128(r1)
-  l.mtspr r0, r13, CPU_OR1K_SPR_EPCR0 
-
-  /* EEAR */
-  l.lwz  r13,  132(r1)
-  l.mtspr r0, r13, CPU_OR1K_SPR_EEAR0 
-  
-  /* ESR */
-  l.lwz  r13,  136(r1)
-  l.mtspr r0, r13, CPU_OR1K_SPR_ESR0
-  
-  l.lwz  r1,  4(r1)
-  l.lwz  r2,  8(r1)
-  l.lwz  r4,  12(r1)
-  l.lwz  r4,  16(r1)
-  l.lwz  r5,  20(r1)
-  l.lwz  r6,  24(r1)
-  l.lwz  r7,  28(r1)
-  l.lwz  r8,  32(r1)
-  l.lwz  r9,  36(r1)
-  l.lwz  r10, 40(r1)
-  l.lwz  r11, 44(r1)
-  l.lwz  r12, 48(r1)
-  l.lwz  r13, 52(r1)
-  l.lwz  r14, 56(r1)
-  l.lwz  r15, 60(r1)
-  l.lwz  r16, 64(r1)
-  l.lwz  r17, 68(r1)
-  l.lwz  r18, 72(r1)
-  l.lwz  r19, 76(r1)
-  l.lwz  r20, 80(r1)
-  l.lwz  r21, 84(r1)
-  l.lwz  r22, 88(r1)
-  l.lwz  r23, 92(r1)
-  l.lwz  r24, 96(r1)
-  l.lwz  r25, 100(r1)
-  l.lwz  r26, 104(r1)
-  l.lwz  r27, 108(r1)
-  l.lwz  r28, 112(r1)
-  l.lwz  r29, 116(r1)
-  l.lwz  r30, 120(r1)
-  l.lwz  r31, 124(r1)
-  
-  l.addi r1, r1, 140
-  
-  l.lwz  r3, 0(r1)
   l.addi r1, r1, 4
   
   l.rfe
