@@ -13,12 +13,12 @@
 #include <rtems/score/cpu.h>
 #include <rtems/fatal.h>
 #include <bsp/linker-symbols.h>
+#include <stdio.h>
 
 void _OR1K_Exception_default(uint32_t vector, CPU_Exception_frame *frame);
 
 void _OR1K_Exception_default(uint32_t vector, CPU_Exception_frame *frame)
 {
-  printk("Exception occured with vector number %d", vector);
   rtems_fatal( RTEMS_FATAL_SOURCE_EXCEPTION, (rtems_fatal_code) frame );
 }
 

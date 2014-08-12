@@ -93,8 +93,8 @@ void _CPU_ISR_install_vector(
   }
 
   /* Write only if necessary to avoid writes to a maybe read-only memory */
-  if (current_handler != (uint32_t) new_handler) {
-    table [vector] = (uint32_t) new_handler;
+  if (current_handler != new_handler) {
+    table [vector] = new_handler;
   }
     
    _ISR_Enable( level );
@@ -106,5 +106,7 @@ void _CPU_Install_interrupt_stack( void )
 
 void _CPU_Thread_Idle_body( void )
 {
+  do {
      _OR1K_CPU_Sleep();
+  } while (1);
 }

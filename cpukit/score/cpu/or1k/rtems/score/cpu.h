@@ -32,7 +32,9 @@ extern "C" {
 #include <rtems/score/or1k-utility.h>
 #include <rtems/score/types.h>
 #ifndef ASM
+#include <rtems/bspIo.h>
 #include <stdint.h>
+#include <stdio.h> /* for printk */
 #endif
 
 /* conditional compilation parameters */
@@ -178,7 +180,7 @@ extern "C" {
  */
  
 #define CPU_HARDWARE_FP     FALSE
-#define CPU_SOFTWARE_FP     TRUE
+#define CPU_SOFTWARE_FP     FALSE
 
 /*
  *  Are all tasks RTEMS_FLOATING_POINT tasks implicitly?
