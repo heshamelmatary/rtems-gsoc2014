@@ -258,9 +258,21 @@
 /*Context ID (Fast Context Switching) */
 #define CPU_OR1K_SPR_SR_CID   (F << CPU_OR1K_SPR_SR_SHAMT_CID)
 
-/* Used to disable interrupts */
-#define CPU_OR1K_ISR_STATUS_MASK_I_DIS  0xFFFFFFFB 
+/* Power management register bits */
+#define CPU_OR1K_SPR_PMR_SHAMT_SDF  0
+#define CPU_OR1K_SPR_PMR_SHAMT_DME  4
+#define CPU_OR1K_SPR_PMR_SHAMT_SME  5
+#define CPU_OR1K_SPR_PMR_SHAMT_DCGE 6
+#define CPU_OR1K_SPR_PMR_SHAMT_SUME 7
 
+#define CPU_OR1K_SPR_PMR_SDF  (0xF << CPU_OR1K_SPR_PMR_SHAMT_SDF)
+#define CPU_OR1K_SPR_PMR_DME  (1 << CPU_OR1K_SPR_PMR_SHAMT_DME)
+#define CPU_OR1K_SPR_PMR_SME  (1 << CPU_OR1K_SPR_PMR_SHAMT_SME)
+#define CPU_OR1K_SPR_PMR_DCGE (1 << CPU_OR1K_SPR_PMR_SHAMT_DCGE)
+#define CPU_OR1K_SPR_PMR_SUME (1 << CPU_OR1K_SPR_PMR_SHAMT_SUME)
+
+/* Shift amount macros for bit positions in Power Management register */
+ 
 #ifndef ASM
 
 #include <stddef.h>
@@ -296,14 +308,14 @@ typedef enum {
   OR1K_EXCPETION_RESERVED3 = 17,
   MAX_EXCEPTIONS = 17,
   OR1K_EXCEPTION_MAKE_ENUM_32_BIT = 0xffffffff
-} OR1K_symbolic_exception_name;
+} OR1K_Symbolic_exception_name;
 
 static inline uint32_t _OR1K_mfspr(uint32_t reg)
 {
    uint32_t spr_value;
   
    asm volatile (
-     "l.mfspr  %1, r0, 0"
+     "l.mfspr  %0, %1, 0;\n\t"
      : "=r" (spr_value) : "r" (reg));
    
    return spr_value;
@@ -312,10 +324,35 @@ static inline uint32_t _OR1K_mfspr(uint32_t reg)
 static inline void _OR1K_mtspr(uint32_t reg, uint32_t value)
 { 
    asm volatile (
-     "l.mtspr  %1, %0, 0;"
+     "l.mtspr  %1, %0, 0;\n\t"
      :: "r" (value), "r" (reg)
    );
 }
+
+/**
+ * @brief The slow down feature takes advantage of the low-power
+ * dividers in external clock generation circuitry to enable full 
+ * functionality, but at a lower frequency so that power consumption
+ * is reduced. @see OpenRISC architecture manual, power management section.
+ *
+ * @param[in] value is 4 bit value to be written in PMR[SDF].
+ * A lower value specifies higher expected performance from the processor core.
+ *
+ */
+#define _OR1K_CPU_SlowDown(value) \
+   _OR1K_mtspr(CPU_OR1K_SPR_PMR, (value & CPU_OR1K_SPR_PMR_SDF))
+
+
+#define _OR1K_CPU_Doze() \
+  _OR1K_mtspr(CPU_OR1K_SPR_PMR, CPU_OR1K_SPR_PMR_DME)
+
+
+#define _OR1K_CPU_Sleep() \
+   _OR1K_mtspr(CPU_OR1K_SPR_PMR, CPU_OR1K_SPR_PMR_SME)
+
+
+#define _OR1K_CPU_Suspend() \
+   _OR1K_mtspr(CPU_OR1K_SPR_PMR, CPU_OR1K_SPR_PMR_SME)
 
 static inline void _OR1K_Sync_mem( void )
 {

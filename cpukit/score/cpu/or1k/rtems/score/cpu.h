@@ -176,15 +176,9 @@ extern "C" {
  *  floating point architecture is expected to change significantly
  *  before such chips are fabricated.
  */
-
-#if ( OR1K_HAS_FPU == 1 )
-#define CPU_HARDWARE_FP     TRUE
-#define CPU_SOFTWARE_FP     FALSE
-#else
+ 
 #define CPU_HARDWARE_FP     FALSE
 #define CPU_SOFTWARE_FP     TRUE
-#endif
-
 
 /*
  *  Are all tasks RTEMS_FLOATING_POINT tasks implicitly?
@@ -467,7 +461,11 @@ typedef struct {
 #define _CPU_Context_Get_SP( _context ) \
   (_context)->r1
   
-typedef void Context_Control_fp;
+typedef struct {
+  /** FPU registers are listed here */ 
+  double      some_float_register;
+} Context_Control_fp;
+
 typedef Context_Control CPU_Interrupt_frame;
 
 /*
@@ -481,6 +479,7 @@ typedef Context_Control CPU_Interrupt_frame;
  */
 
 #define CPU_CONTEXT_FP_SIZE  0
+SCORE_EXTERN Context_Control_fp  _CPU_Null_fp_context;
 
 /*
  *  Amount of extra stack (above minimum stack size) required by
@@ -592,18 +591,17 @@ typedef Context_Control CPU_Interrupt_frame;
 
 static inline uint32_t or1k_interrupt_disable( void )
 {
-  volatile uint32_t sr;
-  
+  uint32_t sr;
   sr = _OR1K_mfspr(CPU_OR1K_SPR_SR);
   
-  _OR1K_mtspr(CPU_OR1K_SPR_SR, (sr & CPU_OR1K_ISR_STATUS_MASK_I_DIS));
+  _OR1K_mtspr(CPU_OR1K_SPR_SR, (sr & ~CPU_OR1K_SPR_SR_IEE));
   
   return sr;
 }
 
 static inline void or1k_interrupt_enable(uint32_t level)
 {
-  volatile uint32_t sr;
+  uint32_t sr;
   
   /* Enable interrupts and restore rs */
   sr = level | CPU_OR1K_SPR_SR_IEE | CPU_OR1K_SPR_SR_TEE; 
@@ -611,10 +609,9 @@ static inline void or1k_interrupt_enable(uint32_t level)
 
 }
 
-#define _CPU_ISR_Disable( _isr_cookie ) \
-  do{ \
-    _isr_cookie = or1k_interrupt_disable(); \
-  } while (0)
+#define _CPU_ISR_Disable( _level ) \
+    _level = or1k_interrupt_disable() 
+
 
 /*
  *  Enable interrupts to the previous level (returned by _CPU_ISR_Disable).
@@ -623,8 +620,8 @@ static inline void or1k_interrupt_enable(uint32_t level)
  *
  */
 
-#define _CPU_ISR_Enable( _isr_cookie )  \
-  or1k_interrupt_enable( _isr_cookie )
+#define _CPU_ISR_Enable( _level )  \
+  or1k_interrupt_enable( _level )
 
 /*
  *  This temporarily restores the interrupt to _level before immediately
@@ -634,9 +631,11 @@ static inline void or1k_interrupt_enable(uint32_t level)
  *
  */
 
-#define _CPU_ISR_Flash( _isr_cookie ) \
-  { \
-  }
+#define _CPU_ISR_Flash( _level ) \
+  do{ \
+      _CPU_ISR_Enable( _level ); \
+      _OR1K_mtspr(CPU_OR1K_SPR_SR, (_level & ~CPU_OR1K_SPR_SR_IEE)); \
+    } while(0)
 
 /*
  *  Map interrupt level in task mode onto the hardware that the CPU
@@ -755,10 +754,11 @@ void _CPU_Context_Initialize(
  *
  */
 
-void _CPU_Context_Initialize_fp(
-  void **fp_context_ptr
-);
-
+#define _CPU_Context_Initialize_fp( _destination ) \
+  { \
+   *(*(_destination)) = _CPU_Null_fp_context; \
+  }
+  
 /* end of Context handler macros */
 
 /* Fatal Error manager macros */
@@ -883,8 +883,8 @@ void _CPU_Context_Initialize_fp(
 
 #endif
 
-#define CPU_TIMESTAMP_USE_STRUCT_TIMESPEC TRUE
-#define CPU_TIMESTAMP_USE_INT64 FALSE
+#define CPU_TIMESTAMP_USE_STRUCT_TIMESPEC FALSE
+#define CPU_TIMESTAMP_USE_INT64 TRUE
 #define CPU_TIMESTAMP_USE_INT64_INLINE FALSE
 
 typedef struct {
