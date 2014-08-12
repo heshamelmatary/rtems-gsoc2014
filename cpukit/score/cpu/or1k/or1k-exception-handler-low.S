@@ -32,37 +32,11 @@ PUBLIC(_ISR_Handler)
   
   l.addi  r1, r1, -140
   
+  l.sw  8(r1),r2
   /* r3 is saved by BSP exception handler */
   l.sw  16(r1),r4
   l.sw  20(r1),r5
   l.sw  24(r1),r6
-  
-  /* Save interrupted task stack pointer */
-  l.addi r4, r1, 144
-  l.sw   4(r1), r4
-  
-  /* Save interrupted task r3 (first arg) value */
-  l.addi r4, r1, 140
-  l.lwz  r4, 0(r4)
-  l.sw  12(r1), r4
-  
-  /* Increment nesting level */
-  l.movhi r6, hi(ISR_NEST_LEVEL)
-  l.ori   r6, r6, lo(ISR_NEST_LEVEL)
-  l.lwz   r5, 0(r6)
-  l.addi  r5, r5, 1
-  l.sw    0(r6), r5
-  
-  /* Disable multitasking */
-  l.movhi r6, hi(THREAD_DISPATCH_DISABLE_LEVEL)
-  l.ori   r6, r6, lo(THREAD_DISPATCH_DISABLE_LEVEL)
-  l.lwz   r5, 0(r6)
-  l.addi  r5, r5, 1
-  l.sw    0(r6), r5
-  
-  l.sw  8(r1),r2
-  
-  l.sw  24(r1),r6 
   l.sw  28(r1),r7
   l.sw  32(r1),r8
   l.sw  36(r1),r9
@@ -88,6 +62,7 @@ PUBLIC(_ISR_Handler)
   l.sw  116(r1),r29
   l.sw  120(r1),r30
   l.sw  124(r1),r31
+  
   /* Exception level related registers */
   
   /* EPCR */
@@ -101,7 +76,31 @@ PUBLIC(_ISR_Handler)
   /* ESR */
   l.mfspr r13, r0, CPU_OR1K_SPR_ESR0 
   l.sw  136(r1), r13  /* esr */ 
+  
+  /* Increment nesting level */
+  l.movhi r6, hi(ISR_NEST_LEVEL)
+  l.ori   r6, r6, lo(ISR_NEST_LEVEL)
+  
+  /* Disable multitasking */
+  l.movhi r8, hi(THREAD_DISPATCH_DISABLE_LEVEL)
+  l.ori   r8, r8, lo(THREAD_DISPATCH_DISABLE_LEVEL)
+  
+  l.lwz   r5, 0(r6)
+  l.lwz   r7, 0(r8)
+  l.addi  r5, r5, 1
+  l.addi  r7, r7, 1
+  l.sw    0(r6), r5
+  l.sw    0(r8), r7
 
+  /* Save interrupted task stack pointer */
+  l.addi r4, r1, 144
+  l.sw   4(r1), r4
+  
+  /* Save interrupted task r3 (first arg) value */
+  l.addi r4, r1, 140
+  l.lwz  r4, 0(r4)
+  l.sw  12(r1), r4
+  
   /* Keep r1 (Exception frame address) in r14 */
   l.add   r14, r1, r0
   
@@ -156,19 +155,20 @@ PUBLIC(_ISR_Handler)
   l.lwz  r13,  136(r1)
   l.mtspr r0, r13, CPU_OR1K_SPR_ESR0
   
-  /* Decrement nesting level */
+  /* Increment nesting level */
   l.movhi r6, hi(ISR_NEST_LEVEL)
   l.ori   r6, r6, lo(ISR_NEST_LEVEL)
-  l.lwz   r5, 0(r6)
-  l.addi  r5, r5, -1
-  l.sw    0(r6), r5
   
-  /* Enable multitasking */
-  l.movhi r6, hi(THREAD_DISPATCH_DISABLE_LEVEL)
-  l.ori   r6, r6, lo(THREAD_DISPATCH_DISABLE_LEVEL)
+  /* Disable multitasking */
+  l.movhi r8, hi(THREAD_DISPATCH_DISABLE_LEVEL)
+  l.ori   r8, r8, lo(THREAD_DISPATCH_DISABLE_LEVEL)
+  
   l.lwz   r5, 0(r6)
+  l.lwz   r7, 0(r8)
   l.addi  r5, r5, -1
+  l.addi  r7, r7, -1
   l.sw    0(r6), r5
+  l.sw    0(r8), r7
   
   l.lwz  r2,  8(r1)
   l.lwz  r3,  12(r1)
