@@ -115,11 +115,19 @@ PUBLIC(_ISR_Handler)
   l.addi r13, r13, lo(bsp_start_vector_table_begin)
   l.lwz  r13, 0(r13)
   
+  /* Do not switch stacks if we are in a nested interrupt. At 
+   * this point r5 should be holding ISR_NEST_LEVEL value.
+   */
+  l.sfgtui r5, 2
+  l.bf jump_to_c_handler
+  l.nop 
+  
    /* Switch to RTEMS dedicated interrupt stack */
   l.movhi r1, hi(INTERRUPT_STACK_HIGH)
   l.ori   r1, r1, lo(INTERRUPT_STACK_HIGH)
   l.lwz   r1, 0(r1)
-  
+
+jump_to_c_handler:
   l.jalr r13
   l.nop
   

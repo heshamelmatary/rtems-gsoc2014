@@ -258,7 +258,7 @@ extern "C" {
  *
  */
 
-#define CPU_PROVIDES_IDLE_THREAD_BODY    FALSE
+#define CPU_PROVIDES_IDLE_THREAD_BODY    TRUE
 
 /*
  *  Does the stack grow up (toward higher addresses) or down
@@ -651,9 +651,9 @@ static inline void or1k_interrupt_enable(uint32_t level)
  *
  */
 
-void   _CPU_ISR_Set_level( uint32_t level );
+void _CPU_ISR_Set_level( uint32_t level );
 
-uint32_t   _CPU_ISR_Get_level( void );
+uint32_t _CPU_ISR_Get_level( void );
 
 /* end of ISR handler macros */
 

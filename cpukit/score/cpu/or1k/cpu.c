@@ -15,6 +15,7 @@
 #include <rtems/score/isr.h>
 #include <rtems/score/wkspace.h>
 #include <bsp/linker-symbols.h>
+#include <rtems/score/cpu.h>
 
 /**
  * @brief Performs processor dependent initialization.
@@ -33,7 +34,7 @@ void _CPU_Initialize(void)
  * can range from 0 to 15. @see OpenRISC architecture manual.
  *
  */
-inline void _CPU_ISR_Set_level(uint32_t level)
+void _CPU_ISR_Set_level(uint32_t level)
 {
   uint32_t sr = 0;
   level = (level > 0)? 1 : 0;
