@@ -147,8 +147,7 @@ SECTIONS {
   .stack : ALIGN_WITH_INPUT {
     bsp_section_stack_end = .;
   } > REGION_STACK AT > REGION_STACK
-  /* FIXME: Currently RAM memory size is 128 */
-  bsp_section_stack_begin = 0x18000000;
+  bsp_section_stack_begin = 0x00802000;
   bsp_section_stack_size = bsp_section_stack_begin - bsp_section_stack_end;
 
   /* FIXME */

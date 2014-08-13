@@ -10,7 +10,7 @@ ACLOCAL_AMFLAGS = -I ../../../../aclocal
 include $(top_srcdir)/../../../../automake/compile.am
 
 include_bspdir = $(includedir)/bsp
-include_libcpudir = $(includedir)/libcpu
+#include_libcpudir = $(includedir)/libcpu
 
 dist_project_lib_DATA = bsp_specs
 
@@ -18,10 +18,22 @@ dist_project_lib_DATA = bsp_specs
 #                  Header                                                     #
 ###############################################################################
 
+include_bsp_HEADERS =
 include_HEADERS = include/bsp.h
 include_HEADERS += include/tm27.h
 
-include_bsp_HEADERS = ../shared/include/linker-symbols.h
+nodist_include_bsp_HEADERS = ../../shared/include/bootcard.h
+
+include_bsp_HEADERS += ../shared/include/linker-symbols.h
+include_bsp_HEADERS += ../../../libbsp/shared/include/mm.h
+include_bsp_HEADERS += ../../shared/include/utility.h
+include_bsp_HEADERS += ../../shared/include/irq-generic.h
+include_bsp_HEADERS += ../../shared/include/irq-info.h
+include_bsp_HEADERS += ../../shared/include/stackalloc.h
+include_bsp_HEADERS += ../../shared/include/uart-output-char.h
+include_bsp_HEADERS += ../../shared/tod.h
+include_bsp_HEADERS += include/uart.h
+include_bsp_HEADERS += include/or1ksim.h
 
 nodist_include_HEADERS = ../../shared/include/coverhd.h \
   include/bspopts.h
@@ -44,9 +56,36 @@ project_lib_DATA += startup/linkcmds
 
 noinst_LIBRARIES += libbsp.a
 
+libbsp_a_SOURCES =
+libbsp_a_CPPFLAGS =
+libbsp_a_LIBADD =
+
 # Startup
 #libbsp_a_SOURCES += startup/bspreset.c
-libbsp_a_SOURCES = startup/bspstart.c
+libbsp_a_SOURCES += startup/bspstart.c
+
+# Shared
+libbsp_a_SOURCES += ../../shared/bootcard.c
+libbsp_a_SOURCES += ../../shared/bspclean.c
+libbsp_a_SOURCES += ../../shared/bspgetworkarea.c
+libbsp_a_SOURCES += ../../shared/bsplibc.c
+libbsp_a_SOURCES += ../../shared/bsppost.c
+libbsp_a_SOURCES += ../../shared/bsppredriverhook.c
+libbsp_a_SOURCES += ../../shared/bsppretaskinghook.c
+libbsp_a_SOURCES += ../../shared/cpucounterread.c
+libbsp_a_SOURCES += ../../shared/cpucounterdiff.c
+libbsp_a_SOURCES += ../../shared/gnatinstallhandler.c
+libbsp_a_SOURCES += ../../shared/sbrk.c
+libbsp_a_SOURCES += ../../shared/src/stackalloc.c
+
+# Console
+libbsp_a_SOURCES += ../../shared/console.c
+libbsp_a_SOURCES += ../../shared/console_control.c
+libbsp_a_SOURCES += ../../shared/console_read.c
+libbsp_a_SOURCES += ../../shared/console_select.c
+libbsp_a_SOURCES += ../../shared/console_write.c
+libbsp_a_SOURCES += console/console-config.c
+libbsp_a_SOURCES += console/uart.c
 
 ###############################################################################
 #                  Special Rules                                              #
