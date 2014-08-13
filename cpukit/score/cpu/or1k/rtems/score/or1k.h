@@ -5,7 +5,7 @@
 /*
  *  This file contains information pertaining to the OR1K processor.
  *
- *  COPYRIGHT (c) 2014 Hesham ALMatary <heshamelmatary@gmail.com>
+ *  COPYRIGHT (c) 2014 Hesham ALMatary
  *
  *  Based on code with the following copyright...
  *  COPYRIGHT (c) 1989-1999, 2010.
@@ -15,7 +15,7 @@
  *  found in the file LICENSE in this distribution or at
  *  http://www.rtems.org/license/LICENSE.
  */
-
+ 
 #ifndef _RTEMS_SCORE_OR1K_H
 #define _RTEMS_SCORE_OR1K_H
 
@@ -34,7 +34,7 @@ extern "C" {
  *  that this port supports and which RTEMS CPU model they correspond
  *  to.
  */
-
+ 
  /*
  *  Define the name of the CPU family and specific model.
  */

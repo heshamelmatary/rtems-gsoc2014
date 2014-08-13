@@ -1,7 +1,7 @@
 /*
- *  Opencore OR1K CPU Dependent Source
+ *  Opencore Or1k CPU Dependent Source
  *
- *  COPYRIGHT (c) 2014 Hesham ALMatary <heshamelmatary@gmail.com>
+ *
  *  COPYRIGHT (c) 1989-1999.
  *  On-Line Applications Research Corporation (OAR).
  *
@@ -9,104 +9,166 @@
  *  found in the file LICENSE in this distribution or at
  *  http://www.rtems.com/license/LICENSE.
  *
+ *  This file adapted from no_bsp board library of the RTEMS distribution.
+ *  The body has been modified for the Bender Or1k implementation by
+ *  Chris Ziomkowski. <chris@asics.ws>
  */
 
 #include <rtems/system.h>
 #include <rtems/score/isr.h>
 #include <rtems/score/wkspace.h>
-#include <bsp/linker-symbols.h>
-#include <rtems/score/cpu.h>
 
-/**
- * @brief Performs processor dependent initialization.
- */
-void _CPU_Initialize(void)
-{
-  /* Do nothing */
-}
-
-/**
- * @brief Sets the hardware interrupt level by the level value.
+/*  _CPU_Initialize
  *
- * @param[in] level for or1k can only range over two values:
- * 0 (enable interrupts) and 1 (disable interrupts). In future
- * implementations if fast context switch is implemented, the level
- * can range from 0 to 15. @see OpenRISC architecture manual.
+ *  This routine performs processor dependent initialization.
+ *
+ *  INPUT PARAMETERS:
+ *    cpu_table       - CPU table to initialize
+ *    thread_dispatch - address of disptaching routine
  *
  */
-void _CPU_ISR_Set_level(uint32_t level)
-{
-  uint32_t sr = 0;
-  level = (level > 0)? 1 : 0;
 
-  /* map level bit to or1k interrupt enable/disable bit in sr register */
-  level <<= CPU_OR1K_SPR_SR_SHAMT_IEE;
-
-  sr = _OR1K_mfspr(CPU_OR1K_SPR_SR);
-
-  if (level == 0){ /* Enable all interrupts */
-    sr |= CPU_OR1K_SPR_SR_IEE | CPU_OR1K_SPR_SR_TEE;
-
-  } else{
-    sr &= ~CPU_OR1K_SPR_SR_IEE;
-  }
-
-  _OR1K_mtspr(CPU_OR1K_SPR_SR, sr);
- }
-
-uint32_t  _CPU_ISR_Get_level( void )
-{
-  uint32_t sr = 0;
-
-  sr = _OR1K_mfspr(CPU_OR1K_SPR_SR);
-
-  return (sr & CPU_OR1K_SPR_SR_IEE)? 0 : 1;
-}
-
-void _CPU_ISR_install_raw_handler(
-  uint32_t   vector,
-  proc_ptr    new_handler,
-  proc_ptr   *old_handler
+void _CPU_Initialize(
+void
 )
 {
+  /*
+   *  The thread_dispatch argument is the address of the entry point
+   *  for the routine called at the end of an ISR once it has been
+   *  decided a context switch is necessary.  On some compilation
+   *  systems it is difficult to call a high-level language routine
+   *  from assembly.  This allows us to trick these systems.
+   *
+   *  If you encounter this problem save the entry point in a CPU
+   *  dependent variable.
+   */
+
+
+  /*
+   *  If there is not an easy way to initialize the FP context
+   *  during Context_Initialize, then it is usually easier to
+   *  save an "uninitialized" FP context here and copy it to
+   *  the task's during Context_Initialize.
+   */
+
+  /* FP context initialization support goes here */
+
+ // _CPU_Table = *cpu_table;
 }
+
+/*PAGE
+ *
+ *  _CPU_ISR_Get_level
+ *
+ *  or1k Specific Information:
+ *
+ *  There are only 2 interrupt levels for the or1k architecture.
+ *  Either interrupts are enabled or disabled. They are considered
+ *  enabled if both exceptions are enabled (SR_EXR) and interrupts
+ *  are enabled (SR_EIR). If either of these conditions are not
+ *  met, interrupts are disabled, and a level of 1 is returned.
+ */
+
+inline uint32_t   _CPU_ISR_Get_level( void )
+{
+  register uint32_t   sr;
+  asm("l.mfspr %0,r0,0x17" : "=r" (sr));
+  return !((sr & SR_EXR) && (sr & SR_EIR));
+}
+
+/*PAGE
+ *
+ *  _CPU_ISR_install_raw_handler
+ *
+ *  or1k Specific Information:
+ *
+ *  As a general rule the following is done for interrupts:
+ *  
+ *  For normal exceptions, exceptions are immediately reenabled
+ *  by setting the SR_EXR bit. For interrupt exceptions, the
+ *  SR_EIR bit is first cleared, and then exceptions are reenabled.
+ */
+ 
+void _CPU_ISR_install_raw_handler(
+  uint32_t    vector,
+  void    	 *new_handler,
+  void   *old_handler
+)
+{
+  register uint32_t   sr;
+  register uint32_t   tmp;
+  extern uint32_t   Or1k_Interrupt_Vectors[];
+
+ /* asm volatile ("l.mfspr %0,r0,0x11\n\t"
+	       "l.addi  %1,r0,-5\n\t"
+	       "l.and   %1,%1,%0\n\t": "=r" (sr) : "r" (tmp));
+  *old_handler = *((proc_ptr*)&Or1k_Interrupt_Vectors[vector]);
+  *((proc_ptr*)&Or1k_Interrupt_Vectors[vector]) = new_handler;
+  asm volatile ("l.mtspr r0,%0,0x11\n\t":: "r" (sr));
+*/
+}
+
+/*PAGE
+ *
+ *  _CPU_ISR_install_vector
+ *
+ *  This kernel routine installs the RTEMS handler for the
+ *  specified vector.
+ *
+ *  Input parameters:
+ *    vector      - interrupt vector number
+ *    old_handler - former ISR for this vector number
+ *    new_handler - replacement ISR for this vector number
+ *
+ *  Output parameters:  NONE
+ *
+ *
+ *  NO_CPU Specific Information:
+ *
+ *  XXX document implementation including references if appropriate
+ */
 
 void _CPU_ISR_install_vector(
   uint32_t    vector,
-  proc_ptr    new_handler,
-  proc_ptr   *old_handler
+  void*    new_handler,
+  void   *old_handler
 )
 {
-   proc_ptr *table =
-     (proc_ptr *) bsp_start_vector_table_begin;
-   proc_ptr current_handler;
-
-   ISR_Level level;
-
-  _ISR_Disable( level );
-
-  current_handler = table [vector];
-
-  /* The current handler is now the old one */
-  if (old_handler != NULL) {
-    *old_handler = (proc_ptr) current_handler;
-  }
-
-  /* Write only if necessary to avoid writes to a maybe read-only memory */
-  if (current_handler != new_handler) {
-    table [vector] = new_handler;
-  }
-
-   _ISR_Enable( level );
 }
+
+/*PAGE
+ *
+ *  _CPU_Install_interrupt_stack
+ *  
+ *  We don't use a separate interrupt stack.
+ *
+ */
 
 void _CPU_Install_interrupt_stack( void )
 {
 }
 
+/*PAGE
+ *
+ *  _CPU_Thread_Idle_body
+ *
+ *  NOTES:
+ *
+ *  1. This is the same as the regular CPU independent algorithm.
+ *
+ *  2. If you implement this using a "halt", "idle", or "shutdown"
+ *     instruction, then don't forget to put it in an infinite loop.
+ *
+ *  3. Be warned. Some processors with onboard DMA have been known
+ *     to stop the DMA if the CPU were put in IDLE mode.  This might
+ *     also be a problem with other on-chip peripherals.  So use this
+ *     hook with caution.
+ *
+ */
+
 void _CPU_Thread_Idle_body( void )
 {
-  do {
-     _OR1K_CPU_Sleep();
-  } while (1);
+
+  for( ; ; )
+    /* insert your "halt" instruction here */ ;
 }

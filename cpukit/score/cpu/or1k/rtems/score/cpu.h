@@ -6,7 +6,7 @@
  *  This include file contains macros pertaining to the Opencores
  *  or1k processor family.
  *
- *  COPYRIGHT (c) 2014 Hesham ALMatary <heshamelmatary@gmail.com>
+ *  COPYRIGHT (c) 2014 Hesham ALMatary
  *  COPYRIGHT (c) 1989-1999.
  *  On-Line Applications Research Corporation (OAR).
  *
@@ -27,14 +27,10 @@
 extern "C" {
 #endif
 
-
-#include <rtems/score/or1k.h>            /* pick up machine definitions */
-#include <rtems/score/or1k-utility.h>
-#include <rtems/score/types.h>
-#ifndef ASM
-#include <rtems/bspIo.h>
 #include <stdint.h>
-#include <stdio.h> /* for printk */
+#include "rtems/score/or1k.h"            /* pick up machine definitions */
+#ifndef ASM
+#include "rtems/score/types.h"
 #endif
 
 /* conditional compilation parameters */
@@ -103,12 +99,16 @@ extern "C" {
  *  is unclear what that would imply about the interrupt processing
  *  procedure on that CPU.
  *
- *  Currently, for or1k port, _ISR_Handler is responsible for switching to
- *  RTEMS dedicated interrupt task.
- *
+ *  For the first cut of an Or1k implementation, let's not worry
+ *  about this, and assume that our C code will autoperform any
+ *  frame/stack allocation for us when the procedure is entered.
+ *  If we write assembly code, we may have to deal with this manually.
+ *  This can be changed later if we find it is impossible. This
+ *  behavior is desireable as it allows us to work in low memory
+ *  environments where we don't have room for a dedicated stack.
  */
 
-#define CPU_HAS_SOFTWARE_INTERRUPT_STACK TRUE
+#define CPU_HAS_SOFTWARE_INTERRUPT_STACK FALSE
 
 /*
  *  Does this CPU have hardware support for a dedicated interrupt stack?
@@ -139,16 +139,16 @@ extern "C" {
  *
  */
 
-#define CPU_ALLOCATE_INTERRUPT_STACK TRUE
+#define CPU_ALLOCATE_INTERRUPT_STACK FALSE
 
 /*
  *  Does the RTEMS invoke the user's ISR with the vector number and
- *  a pointer to the saved interrupt frame (1) or just the vector
+ *  a pointer to the saved interrupt frame (1) or just the vector 
  *  number (0)?
  *
  */
 
-#define CPU_ISR_PASSES_FRAME_POINTER 1
+#define CPU_ISR_PASSES_FRAME_POINTER 0
 
 /*
  *  Does the CPU have hardware floating point?
@@ -166,7 +166,7 @@ extern "C" {
  *  an i387 and wish to leave floating point support out of RTEMS.
  *
  *  The CPU_SOFTWARE_FP is used to indicate whether or not there
- *  is software implemented floating point that must be context
+ *  is software implemented floating point that must be context 
  *  switched.  The determination of whether or not this applies
  *  is very tool specific and the state saved/restored is also
  *  compiler specific.
@@ -179,8 +179,14 @@ extern "C" {
  *  before such chips are fabricated.
  */
 
-#define CPU_HARDWARE_FP     FALSE
+#if ( OR1K_HAS_FPU == 1 )
+#define CPU_HARDWARE_FP     TRUE
 #define CPU_SOFTWARE_FP     FALSE
+#else
+#define CPU_HARDWARE_FP     FALSE
+#define CPU_SOFTWARE_FP     TRUE
+#endif
+
 
 /*
  *  Are all tasks RTEMS_FLOATING_POINT tasks implicitly?
@@ -260,7 +266,7 @@ extern "C" {
  *
  */
 
-#define CPU_PROVIDES_IDLE_THREAD_BODY    TRUE
+#define CPU_PROVIDES_IDLE_THREAD_BODY    FALSE
 
 /*
  *  Does the stack grow up (toward higher addresses) or down
@@ -269,6 +275,12 @@ extern "C" {
  *  If TRUE, then the grows upward.
  *  If FALSE, then the grows toward smaller addresses.
  *
+ *  OR1k Specific Information:
+ *  
+ *  Previously I had misread the documentation and set this
+ *  to true. Surprisingly, it seemed to work anyway. I'm
+ *  therefore not 100% sure exactly what this does. It should
+ *  be correct as it is now, however. 
  */
 
 #define CPU_STACK_GROWS_UP               FALSE
@@ -363,61 +375,132 @@ extern "C" {
  *
  *
  */
-#ifndef ASM
+
 #ifdef OR1K_64BIT_ARCH
-#define or1kreg uint64_t
+#define or1kreg uint64_t  
 #else
-#define or1kreg uint32_t
+#define or1kreg uint32_t  
 #endif
 
-typedef struct {
-  uint32_t  r1;     /* Stack pointer */
-  uint32_t  r2;     /* Frame pointer */
-  uint32_t  r3;
-  uint32_t  r4;
-  uint32_t  r5;
-  uint32_t  r6;
-  uint32_t  r7;
-  uint32_t  r8;
-  uint32_t  r9;
-  uint32_t  r10;
-  uint32_t  r11;
-  uint32_t  r12;
-  uint32_t  r13;
-  uint32_t  r14;
-  uint32_t  r15;
-  uint32_t  r16;
-  uint32_t  r17;
-  uint32_t  r18;
-  uint32_t  r19;
-  uint32_t  r20;
-  uint32_t  r21;
-  uint32_t  r22;
-  uint32_t  r23;
-  uint32_t  r24;
-  uint32_t  r25;
-  uint32_t  r26;
-  uint32_t  r27;
-  uint32_t  r28;
-  uint32_t  r29;
-  uint32_t  r30;
-  uint32_t  r31;
+/* SR_MASK is the mask of values that will be copied to/from the status
+   register on a context switch. Some values, like the flag state, are
+   specific on the context, while others, such as interrupt enables,
+   are global. The currently defined global bits are:
 
-  uint32_t  sr;  /* Current supervision register non persistent values */
-  uint32_t  epcr;
-  uint32_t  eear;
-  uint32_t  esr;
+   0x00001 SUPV:     Supervisor mode
+   0x00002 EXR:      Exceptions on/off
+   0x00004 EIR:      Interrupts enabled/disabled
+   0x00008 DCE:      Data cache enabled/disabled
+   0x00010 ICE:      Instruction cache enabled/disabled
+   0x00020 DME:      Data MMU enabled/disabled
+   0x00040 IME:      Instruction MMU enabled/disabled
+   0x00080 LEE:      Little/Big Endian enable
+   0x00100 CE:       Context ID/shadow regs enabled/disabled
+   0x01000 OVE:      Overflow causes exception
+   0x04000 EP:       Exceptions @ 0x0 or 0xF0000000
+   0x08000 PXR:      Partial exception recognition enabled/disabled
+   0x10000 SUMRA:    SPR's accessible/inaccessible
+
+   The context specific bits are:
+
+   0x00200 F         Branch flag indicator
+   0x00400 CY        Carry flag indicator
+   0x00800 OV        Overflow flag indicator
+   0x02000 DSX       Delay slot exception occurred
+   0xF8000000 CID    Current Context ID
+*/
+
+#define SR_MASK 0xF8002E00
+
+typedef enum {
+  SR_SUPV = 0x00001,
+  SR_EXR = 0x00002,
+  SR_EIR = 0x00004,
+  SR_DCE = 0x00008,
+  SR_ICE = 0x00010,
+  SR_DME = 0x00020,
+  SR_IME = 0x00040,
+  SR_LEE = 0x00080,
+  SR_CE = 0x00100,
+  SR_F = 0x00200,
+  SR_CY = 0x00400,
+  SR_OV = 0x00800,
+  SR_OVE = 0x01000,
+  SR_DSX = 0x02000,
+  SR_EP = 0x04000,
+  SR_PXR = 0x08000,
+  SR_SUMRA = 0x10000,
+  SR_CID = 0xF8000000,
+} StatusRegisterBits;
+
+typedef struct {
+  uint32_t  sr;     /* Current status register non persistent values */
+  uint32_t  esr;    /* Saved exception status register */
+  uint32_t  ear;    /* Saved exception effective address register */
+  uint32_t  epc;    /* Saved exception PC register    */
+  uint32_t  pc;     /* Context PC 4 or 8 bytes for 64 bit alignment */
+  
+  uint32_t  sp;     /* Stack pointer */
+  uint32_t  fp;     /* Frame pointer */
+  uint32_t  lr;     /* Link address register */  
+  
+  /* Callee-Saved registers */
+  uint32_t  r10;
+  uint32_t  r14;
+  uint32_t  r16;
+  uint32_t  r18;
+  uint32_t  r20;
+  uint32_t  r22;
+  uint32_t  r24;
+  uint32_t  r26;
+  uint32_t  r28;
+  uint32_t  r30;
+  
 } Context_Control;
 
 #define _CPU_Context_Get_SP( _context ) \
-  (_context)->r1
-
-typedef struct {
-  /** FPU registers are listed here */
-  double      some_float_register;
-} Context_Control_fp;
-
+  (_context)->sp
+  
+typedef void Context_Control_fp;
 typedef Context_Control CPU_Interrupt_frame;
+
+
+/*
+ *  The following table contains the information required to configure
+ *  the XXX processor specific parameters.
+ *
+ */
+
+/*
+ *  Macros to access required entires in the CPU Table are in 
+ *  the file rtems/system.h.
+ *
+ */
+
+/*
+ *  Macros to access OR1K specific additions to the CPU Table
+ *
+ */
+
+/* There are no CPU specific additions to the CPU Table for this port. */
+
+/*
+ *  This variable is optional.  It is used on CPUs on which it is difficult
+ *  to generate an "uninitialized" FP context.  It is filled in by
+ *  _CPU_Initialize and copied into the task's FP context area during
+ *  _CPU_Context_Initialize.
+ *
+ */
+
+SCORE_EXTERN Context_Control_fp  _CPU_Null_fp_context; 
+
+
+/*
+ *  Nothing prevents the porter from declaring more CPU specific variables.
+ *
+ */
+
+/* XXX: if needed, put more variables here */
 
 /*
  *  The size of the floating point context area.  On some CPUs this
@@ -429,8 +512,7 @@ typedef Context_Control CPU_Interrupt_frame;
  *
  */
 
-#define CPU_CONTEXT_FP_SIZE  0
-SCORE_EXTERN Context_Control_fp  _CPU_Null_fp_context;
+#define CPU_CONTEXT_FP_SIZE sizeof( Context_Control_fp )
 
 /*
  *  Amount of extra stack (above minimum stack size) required by
@@ -440,6 +522,15 @@ SCORE_EXTERN Context_Control_fp  _CPU_Null_fp_context;
  */
 
 #define CPU_MPCI_RECEIVE_SERVER_EXTRA_STACK 0
+
+/*
+ *  This defines the number of entries in the ISR_Vector_table managed
+ *  by RTEMS.
+ *
+ */
+
+#define CPU_INTERRUPT_NUMBER_OF_VECTORS  16
+#define CPU_INTERRUPT_MAXIMUM_VECTOR_NUMBER  (CPU_INTERRUPT_NUMBER_OF_VECTORS - 1)
 
 /*
  *  Should be large enough to run all RTEMS tests.  This insures
@@ -482,7 +573,7 @@ SCORE_EXTERN Context_Control_fp  _CPU_Null_fp_context;
  *
  *  NOTE:  This does not have to be a power of 2 although it should be
  *         a multiple of 2 greater than or equal to 2.  The requirement
- *         to be a multiple of 2 is because the heap uses the least
+ *         to be a multiple of 2 is because the heap uses the least 
  *         significant field of the front and back flags to indicate
  *         that a block is in use or free.  So you do not want any odd
  *         length blocks really putting length data in that bit.
@@ -526,13 +617,14 @@ SCORE_EXTERN Context_Control_fp  _CPU_Null_fp_context;
 
 /*
  *  Support routine to initialize the RTEMS vector table after it is allocated.
- *
+ *  
  *  NO_CPU Specific Information:
- *
+ * 
  *  XXX document implementation including references if appropriate
  */
 
 #define _CPU_Initialize_vectors()
+
 
 /*
  *  Disable all interrupts for an RTEMS critical section.  The previous
@@ -540,29 +632,10 @@ SCORE_EXTERN Context_Control_fp  _CPU_Null_fp_context;
  *
  */
 
-static inline uint32_t or1k_interrupt_disable( void )
-{
-  uint32_t sr;
-  sr = _OR1K_mfspr(CPU_OR1K_SPR_SR);
-
-  _OR1K_mtspr(CPU_OR1K_SPR_SR, (sr & ~CPU_OR1K_SPR_SR_IEE));
-
-  return sr;
-}
-
-static inline void or1k_interrupt_enable(uint32_t level)
-{
-  uint32_t sr;
-
-  /* Enable interrupts and restore rs */
-  sr = level | CPU_OR1K_SPR_SR_IEE | CPU_OR1K_SPR_SR_TEE;
-  _OR1K_mtspr(CPU_OR1K_SPR_SR, sr);
-
-}
-
-#define _CPU_ISR_Disable( _level ) \
-    _level = or1k_interrupt_disable()
-
+#define _CPU_ISR_Disable( _isr_cookie ) \
+  { \
+    (_isr_cookie) = 0;   /* do something to prevent warnings */ \
+  }
 
 /*
  *  Enable interrupts to the previous level (returned by _CPU_ISR_Disable).
@@ -571,22 +644,21 @@ static inline void or1k_interrupt_enable(uint32_t level)
  *
  */
 
-#define _CPU_ISR_Enable( _level )  \
-  or1k_interrupt_enable( _level )
+#define _CPU_ISR_Enable( _isr_cookie )  \
+  { \
+  }
 
 /*
  *  This temporarily restores the interrupt to _level before immediately
  *  disabling them again.  This is used to divide long RTEMS critical
  *  sections into two or more parts.  The parameter _level is not
- *  modified.
+ * modified.
  *
  */
 
-#define _CPU_ISR_Flash( _level ) \
-  do{ \
-      _CPU_ISR_Enable( _level ); \
-      _OR1K_mtspr(CPU_OR1K_SPR_SR, (_level & ~CPU_OR1K_SPR_SR_IEE)); \
-    } while(0)
+#define _CPU_ISR_Flash( _isr_cookie ) \
+  { \
+  }
 
 /*
  *  Map interrupt level in task mode onto the hardware that the CPU
@@ -602,15 +674,16 @@ static inline void or1k_interrupt_enable(uint32_t level)
  *
  */
 
-void _CPU_ISR_Set_level( uint32_t level );
+#define _CPU_ISR_Set_level( new_level ) \
+  { \
+  }
 
-uint32_t _CPU_ISR_Get_level( void );
+uint32_t   _CPU_ISR_Get_level( void );
 
 /* end of ISR handler macros */
 
 /* Context handler macros */
 
-#define OR1K_FAST_CONTEXT_SWITCH_ENABLED FALSE
 /*
  *  Initialize the context to a state suitable for starting a
  *  task after a context restore operation.  Generally, this
@@ -633,33 +706,8 @@ uint32_t _CPU_ISR_Get_level( void );
  *
  */
 
-/**
- * @brief Initializes the CPU context.
- *
- * The following steps are performed:
- *  - setting a starting address
- *  - preparing the stack
- *  - preparing the stack and frame pointers
- *  - setting the proper interrupt level in the context
- *
- * @param[in] context points to the context area
- * @param[in] stack_area_begin is the low address of the allocated stack area
- * @param[in] stack_area_size is the size of the stack area in bytes
- * @param[in] new_level is the interrupt level for the task
- * @param[in] entry_point is the task's entry point
- * @param[in] is_fp is set to @c true if the task is a floating point task
- * @param[in] tls_area is the thread-local storage (TLS) area
- */
-void _CPU_Context_Initialize(
-  Context_Control *context,
-  void *stack_area_begin,
-  size_t stack_area_size,
-  uint32_t new_level,
-  void (*entry_point)( void ),
-  bool is_fp,
-  void *tls_area
-);
-
+#define _CPU_Context_Initialize( _the_context, _stack_base, _size, \
+                                   _isr, _entry_point, _is_fp, _tls_area ) \
 /*
  *  This routine is responsible for somehow restarting the currently
  *  executing task.  If you are lucky, then all that is necessary
@@ -707,7 +755,7 @@ void _CPU_Context_Initialize(
 
 #define _CPU_Context_Initialize_fp( _destination ) \
   { \
-   *(*(_destination)) = _CPU_Null_fp_context; \
+   *((Context_Control_fp *) *((void **) _destination)) = _CPU_Null_fp_context; \
   }
 
 /* end of Context handler macros */
@@ -786,7 +834,7 @@ void _CPU_Context_Initialize(
  */
 
   /* #define CPU_USE_GENERIC_BITFIELD_CODE FALSE */
-#define CPU_USE_GENERIC_BITFIELD_CODE TRUE
+#define CPU_USE_GENERIC_BITFIELD_CODE TRUE 
 #define CPU_USE_GENERIC_BITFIELD_DATA TRUE
 
 #if (CPU_USE_GENERIC_BITFIELD_CODE == FALSE)
@@ -802,7 +850,7 @@ void _CPU_Context_Initialize(
                    "l.sub   %0,%0,%1    \n\t" : "=&r" (_output), "+r" (_value));
 
 #endif
-
+   
 /* end of Bitfield handler macros */
 
 /*
@@ -834,35 +882,52 @@ void _CPU_Context_Initialize(
 
 #endif
 
-#define CPU_TIMESTAMP_USE_STRUCT_TIMESPEC FALSE
-#define CPU_TIMESTAMP_USE_INT64 TRUE
+#define CPU_TIMESTAMP_USE_STRUCT_TIMESPEC TRUE
+#define CPU_TIMESTAMP_USE_INT64 FALSE
 #define CPU_TIMESTAMP_USE_INT64_INLINE FALSE
 
 typedef struct {
 /* There is no CPU specific per-CPU state */
 } CPU_Per_CPU_control;
-#endif /* ASM */
 
+typedef uint32_t CPU_Counter_ticks;
+typedef uint16_t         Priority_bit_map_Word;
 #define CPU_SIZEOF_POINTER 4
+
 #define CPU_PER_CPU_CONTROL_SIZE 0
 
-#ifndef ASM
-typedef uint32_t CPU_Counter_ticks;
-typedef uint16_t Priority_bit_map_Word;
-
 typedef struct {
-  uint32_t r[32];
-
-  /* The following registers must be saved if we have
-  fast context switch disabled and nested interrupt
-  levels are enabled.
-  */
-#if !OR1K_FAST_CONTEXT_SWITCH_ENABLED
-  uint32_t epcr; /* exception PC register */
-  uint32_t eear; /* exception effective address register */
-  uint32_t esr; /* exception supervision register */
-#endif
-
+  uint32_t register_r1;
+  uint32_t register_r2;
+  uint32_t register_r3;
+  uint32_t register_r4;
+  uint32_t register_r5;
+  uint32_t register_r6;
+  uint32_t register_r7;
+  uint32_t register_r8;
+  uint32_t register_r9;
+  uint32_t register_r10;
+  uint32_t register_r11;
+  uint32_t register_r12;
+  uint32_t register_r13;
+  uint32_t register_r14;
+  uint32_t register_r15;
+  uint32_t register_r16;
+  uint32_t register_r17;
+  uint32_t register_r18;
+  uint32_t register_r19;
+  uint32_t register_r20;
+  uint32_t register_r21;
+  uint32_t register_r22;
+  uint32_t register_r23;
+  uint32_t register_r24;
+  uint32_t register_r25;
+  uint32_t register_r26;
+  uint32_t register_r27;
+  uint32_t register_r28;
+  uint32_t register_r29;
+  uint32_t register_r30;
+  uint32_t register_r31;
 } CPU_Exception_frame;
 
 /**
@@ -871,7 +936,6 @@ typedef struct {
  * @see rtems_fatal() and RTEMS_FATAL_SOURCE_EXCEPTION.
  */
 void _CPU_Exception_frame_print( const CPU_Exception_frame *frame );
-
 
 /* end of Priority handler macros */
 
@@ -891,15 +955,15 @@ void _CPU_Initialize(
 /*
  *  _CPU_ISR_install_raw_handler
  *
- *  This routine installs a "raw" interrupt handler directly into the
+ *  This routine installs a "raw" interrupt handler directly into the 
  *  processor's vector table.
  *
  */
-
+ 
 void _CPU_ISR_install_raw_handler(
   uint32_t    vector,
-  proc_ptr    new_handler,
-  proc_ptr   *old_handler
+  void   *new_handler,
+  void   *old_handler
 );
 
 /*
@@ -914,8 +978,8 @@ void _CPU_ISR_install_raw_handler(
 
 void _CPU_ISR_install_vector(
   uint32_t    vector,
-  proc_ptr   new_handler,
-  proc_ptr   *old_handler
+  void   *new_handler,
+  void   *old_handler
 );
 
 /*
@@ -1014,35 +1078,34 @@ void _CPU_Context_restore_fp(
  *  will be fetched incorrectly.
  *
  */
-
+ 
 static inline unsigned int CPU_swap_u32(
   unsigned int value
 )
 {
   uint32_t   byte1, byte2, byte3, byte4, swapped;
-
+ 
   byte4 = (value >> 24) & 0xff;
   byte3 = (value >> 16) & 0xff;
   byte2 = (value >> 8)  & 0xff;
   byte1 =  value        & 0xff;
-
+ 
   swapped = (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
   return( swapped );
 }
 
-#define CPU_swap_u16( value ) \
-  (((value&0xff) << 8) | ((value >> 8)&0xff))
-
-typedef uint32_t CPU_Counter_ticks;
-
 CPU_Counter_ticks _CPU_Counter_read( void );
 
-CPU_Counter_ticks _CPU_Counter_difference(
+static inline CPU_Counter_ticks _CPU_Counter_difference(
   CPU_Counter_ticks second,
   CPU_Counter_ticks first
-);
+)
+{
+  return second - first;
+}
 
-#endif /* ASM */
+#define CPU_swap_u16( value ) \
+  (((value&0xff) << 8) | ((value >> 8)&0xff))
 
 #ifdef __cplusplus
 }

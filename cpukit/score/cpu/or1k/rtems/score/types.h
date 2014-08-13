@@ -8,14 +8,17 @@
  *  This include file contains type definitions pertaining to the
  *  arm processor family.
  *
- *  COPYRIGHT (c) 2014 Hesham ALMatary <heshamelmatary@gmail.com>
+ *  COPYRIGHT (c) 2014 Hesham ALMatary
  *
  *  The license and distribution terms for this file may be
  *  found in the file LICENSE in this distribution or at
  *  http://www.rtems.org/license/LICENSE.
  *
+ *  This file adapted from no_cpu example of the RTEMS distribution.
+ *  The body has been modified for the Opencores Or1k implementation by
+ *  Chris Ziomkowski. <chris@asics.ws>
  */
-
+ 
  #ifndef _RTEMS_SCORE_TYPES_H
 #define _RTEMS_SCORE_TYPES_H
 
