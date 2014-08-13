@@ -22,6 +22,7 @@
 #include <bsp.h>
 #include <bsp/irq.h>
 #include <bsp/or1ksim.h>
+#include <rtems/score/cpu.h>
 
 static void or1ksim_clock_at_tick(void)
 {
@@ -43,6 +44,26 @@ static void or1ksim_clock_handler_install(void)
 static void or1ksim_clock_initialize(void)
 {
  /* Enable Timer interrupt, restart mode, zero counter register*/
+  register uint32_t   sr;
+  register uint32_t   mask;
+ 
+  asm volatile (
+    "l.mfspr %0,r0,17;"
+	  "l.addi  %1,r0, 0xfffffff9;"
+	  "l.and   %1,%1,%0" : "=r" (sr) : "r" (mask));
+	  
+	  asm volatile (
+    "l.movhi r15,hi(0x6fffffff);"
+    "l.ori   r15,r15,0xffff;"
+    "l.mtspr r0,r0,0x5001;"
+    "l.mtspr r0,r15,0x5000;"
+    );
+    
+    asm volatile (
+    "l.ori %0,%1,0x7;"
+    "l.mtspr r0,%1,0x11\n\t": "=r" (sr): "r" (sr));
+    
+    /*
   __asm__ __volatile__(
     "l.addi  r1,r0,0x00000201;"
     "l.mtspr r1,r0,0;"
@@ -53,9 +74,9 @@ static void or1ksim_clock_initialize(void)
     "l.mtspr r1,r2,0;"
     
     "l.addi  r1,r0,17;"
-    "l.addi  r2,r0,0x3;"
+    "l.addi  r2,r0,0x7;"
     "l.mtspr r1,r2,0;"
-  );
+  );*/
   
  }
  

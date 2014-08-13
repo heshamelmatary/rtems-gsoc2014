@@ -62,18 +62,13 @@ void
  *
  *  or1k Specific Information:
  *
- *  There are only 2 interrupt levels for the or1k architecture.
- *  Either interrupts are enabled or disabled. They are considered
- *  enabled if both exceptions are enabled (SR_EXR) and interrupts
- *  are enabled (SR_EIR). If either of these conditions are not
- *  met, interrupts are disabled, and a level of 1 is returned.
  */
 
 inline uint32_t   _CPU_ISR_Get_level( void )
 {
   register uint32_t   sr;
-  asm("l.mfspr %0,r0,0x17" : "=r" (sr));
-  return !((sr & SR_EXR) && (sr & SR_EIR));
+  //asm("l.mfspr %0,r0,0x17" : "=r" (sr));
+  return 0;
 }
 
 /*PAGE
@@ -90,22 +85,25 @@ inline uint32_t   _CPU_ISR_Get_level( void )
  */
  
 void _CPU_ISR_install_raw_handler(
-  uint32_t    vector,
+  uint32_t   vector,
   void    	 *new_handler,
-  void   *old_handler
+  void       *old_handler
 )
 {
-  register uint32_t   sr;
-  register uint32_t   tmp;
-  extern uint32_t   Or1k_Interrupt_Vectors[];
 
- /* asm volatile ("l.mfspr %0,r0,0x11\n\t"
-	       "l.addi  %1,r0,-5\n\t"
-	       "l.and   %1,%1,%0\n\t": "=r" (sr) : "r" (tmp));
-  *old_handler = *((proc_ptr*)&Or1k_Interrupt_Vectors[vector]);
-  *((proc_ptr*)&Or1k_Interrupt_Vectors[vector]) = new_handler;
+  register uint32_t   sr;
+  register uint32_t   mask;
+
+  asm volatile (
+    "l.mfspr %0,r0,17;"
+	  "l.addi  %1,r0, 0xfffffffb;"
+	  "l.and   %1,%1,%0" : "=r" (sr) : "r" (mask));
+
+  /**old_handler = *((proc_ptr*)&Or1k_Interrupt_Vectors[vector]);
+  *((proc_ptr*)&Or1k_Interrupt_Vectors[vector]) = new_handler;*/
+  
   asm volatile ("l.mtspr r0,%0,0x11\n\t":: "r" (sr));
-*/
+
 }
 
 /*PAGE
@@ -134,6 +132,22 @@ void _CPU_ISR_install_vector(
   void   *old_handler
 )
 {
+   //*old_handler = _ISR_Vector_table[ vector ];
+
+   /*
+    *  If the interrupt vector table is a table of pointer to isr entry
+    *  points, then we need to install the appropriate RTEMS interrupt
+    *  handler for this vector number.
+    */
+
+   _CPU_ISR_install_raw_handler( vector, new_handler, old_handler );
+
+   /*
+    *  We put the actual user ISR address in '_ISR_vector_table'.  This will
+    *  be used by the _ISR_Handler so the user gets control.
+    */
+
+    //_ISR_Vector_table[ vector ] = new_handler;
 }
 
 /*PAGE
@@ -145,6 +159,10 @@ void _CPU_ISR_install_vector(
  */
 
 void _CPU_Install_interrupt_stack( void )
+{
+}
+
+void _CPU_Context_Initialize_fp (void)
 {
 }
 

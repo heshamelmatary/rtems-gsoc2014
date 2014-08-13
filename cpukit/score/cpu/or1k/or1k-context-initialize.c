@@ -1,5 +1,5 @@
 /*
- * COPYRIGHT (c) 2014 Hesham ALMatary <heshamelmatary@gmail.com>
+ * Copyright (c) 2014 Hesham ALMatary
  *
  * COPYRIGHT (c) 1989-2006
  * On-Line Applications Research Corporation (OAR).
@@ -17,7 +17,6 @@
 
 #include <rtems/score/cpu.h>
 #include <rtems/score/interr.h>
-#include <rtems/score/or1k-utility.h>
 
 void _CPU_Context_Initialize(
   Context_Control *context,
@@ -30,14 +29,15 @@ void _CPU_Context_Initialize(
 )
 {
   uint32_t stack = (uint32_t) stack_area_begin;
-  uint32_t sr;
-
-  sr = _OR1K_mfspr(CPU_OR1K_SPR_SR);
-
+  register uint32_t sr;
+  
+  asm volatile (
+  "l.mfspr %0,r0,17;"  : "=r" (sr));
+  
   memset(context, 0, sizeof(*context));
-
+  
   context->r1 = stack;
   context->r2 = stack;
-  context->r9 = (uint32_t) entry_point;
+  context->r9 = entry_point;
   context->sr = sr;
 }
