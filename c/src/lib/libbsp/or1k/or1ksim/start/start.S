@@ -11,6 +11,7 @@
   .extern  bsp_vector_table_size
   .extern  bsp_section_stack_begin 
 
+  .extern _OR1K_Exception_default
   .extern rtems_clock_tick
   .extern _exit
   .extern printk
@@ -36,171 +37,162 @@ _reset:
 
 .org 0x200
 _buserr:
-  l.addi r1,r0,0x200
-  l.jal  bsp_interrupt_handler_default
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x300
 _dPageFault:
-  l.addi r1,r0,0x300
-  l.jal  bsp_interrupt_handler_default
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x400
 _iPageFaule:
-
-  l.addi r1,r0,0x400
-  l.jal  bsp_interrupt_handler_default
+  l.jal  _OR1K_Exception_default
   l.nop
+
 .org 0x500
 _timer:
-  l.addi r1,r0,0x500
+
+  l.nop
+  /*l.addi r1,r0,0x500
   l.jal  bsp_interrupt_handler_default
   l.nop
-  /*
+  
   l.movhi r13,hi(rtems_clock_tick)
   l.ori   r13,r13,lo(rtems_clock_tick)
   l.jalr  r13
   l.rfe
   l.nop
   */
-/*.org 0x600
+
 _misaligned:
-  l.j  unhandled_exception
   l.nop
-*/
+
 .org 0x700
 _undefIns:
-  l.addi r1,r0,0700
-  l.jal  bsp_interrupt_handler_default
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x800
 _exInt:
-  l.addi r1,r0,0x800
-  l.jal  bsp_interrupt_handler_default
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x900
 _dTLB:
-  l.addi r1,r0,0x900
-  l.jal  bsp_interrupt_handler_default
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0xA00
 _iTLB:
-  l.addi r1,r0,0xA00
-  l.jal  bsp_interrupt_handler_default
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0xB00
 _range:
-  l.addi r1,r0,0xB00
-  l.jal  bsp_interrupt_handler_default
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0xC00
 _syscall:
-  l.addi r1,r0,0xC00
-  l.jal  bsp_interrupt_handler_default
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0xD00
 _fp:
-  l.addi r1,r0,0xD00
-  l.jal  bsp_interrupt_handler_default
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0xE00
 _trap:
-  l.addi r0,r0,0xE00
-  l.jal  bsp_interrupt_handler_default
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0xF00
 _undef1:
-  l.j  unhandled_exception
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x1000
 _undef2:
-  l.j  unhandled_exception
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x1100
 _undef3:
-  l.j  unhandled_exception
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x1200
 _undef4:
-  l.j  unhandled_exception
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x1300
 _undef5:
-  l.j  unhandled_exception
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x1400
 _undef6:
-  l.j  unhandled_exception
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x1500
 _undef7:
-  l.j  unhandled_exception
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x1600
 _undef8:
-  l.j  unhandled_exception
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x1700
 _undef9:
-  l.j  unhandled_exception
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x1800
 _undef10:
-  l.j  unhandled_exception
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x1900
 _undef11:
-  l.j  unhandled_exception
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x1A00
 _undef12:
-  l.j  unhandled_exception
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x1B00
 _undef13:
-  l.j  unhandled_exception
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x1C00
 _undef14:
-  l.j  unhandled_exception
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x1D00
 _undef15:
-  l.j  unhandled_exception
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x1E00
 _undef16:
-  l.j  unhandled_exception
+  l.jal  _OR1K_Exception_default
   l.nop
 
 .org 0x1F00
 _undef17:
-  l.j  unhandled_exception
+  l.jal  _OR1K_Exception_default
   l.nop
+
 bsp_start_vector_table_end:
 
 .type _start,@function
