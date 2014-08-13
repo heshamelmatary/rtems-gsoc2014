@@ -23,6 +23,7 @@
 #include <bsp/irq.h>
 #include <bsp/or1ksim.h>
 #include <rtems/score/cpu.h>
+#include <rtems/score/or1k-utility.h>
 
 static void or1ksim_clock_at_tick(void)
 {

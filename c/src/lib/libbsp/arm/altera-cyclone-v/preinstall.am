@@ -5,13 +5,13 @@ $(srcdir)/preinstall.am: Makefile.am
 	$(AMPOLISH3) $(srcdir)/Makefile.am > $(srcdir)/preinstall.am
 endif
 
-PREINSTALL_DIRS =
-DISTCLEANFILES += $(PREINSTALL_DIRS)
-
 all-am: $(PREINSTALL_FILES)
 
 PREINSTALL_FILES =
 CLEANFILES = $(PREINSTALL_FILES)
+
+PREINSTALL_DIRS =
+DISTCLEANFILES += $(PREINSTALL_DIRS)
 
 all-local: $(TMPINSTALL_FILES)
 
@@ -32,11 +32,6 @@ $(PROJECT_INCLUDE)/bsp/$(dirstamp):
 	@$(MKDIR_P) $(PROJECT_INCLUDE)/bsp
 	@: > $(PROJECT_INCLUDE)/bsp/$(dirstamp)
 PREINSTALL_DIRS += $(PROJECT_INCLUDE)/bsp/$(dirstamp)
-
-$(PROJECT_INCLUDE)/bsp/socal/$(dirstamp):
-	@$(MKDIR_P) $(PROJECT_INCLUDE)/bsp/socal
-	@: > $(PROJECT_INCLUDE)/bsp/socal/$(dirstamp)
-PREINSTALL_DIRS += $(PROJECT_INCLUDE)/bsp/socal/$(dirstamp)
 
 $(PROJECT_INCLUDE)/libcpu/$(dirstamp):
 	@$(MKDIR_P) $(PROJECT_INCLUDE)/libcpu
@@ -163,10 +158,6 @@ $(PROJECT_INCLUDE)/bsp/alt_hwlibs_ver.h: hwlib/include/alt_hwlibs_ver.h $(PROJEC
 	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/alt_hwlibs_ver.h
 PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/alt_hwlibs_ver.h
 
-$(PROJECT_INCLUDE)/bsp/alt_i2c.h: hwlib/include/alt_i2c.h $(PROJECT_INCLUDE)/bsp/$(dirstamp)
-	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/alt_i2c.h
-PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/alt_i2c.h
-
 $(PROJECT_INCLUDE)/bsp/alt_interrupt_common.h: hwlib/include/alt_interrupt_common.h $(PROJECT_INCLUDE)/bsp/$(dirstamp)
 	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/alt_interrupt_common.h
 PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/alt_interrupt_common.h
@@ -182,46 +173,6 @@ PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/alt_reset_manager.h
 $(PROJECT_INCLUDE)/bsp/hwlib.h: hwlib/include/hwlib.h $(PROJECT_INCLUDE)/bsp/$(dirstamp)
 	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/hwlib.h
 PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/hwlib.h
-
-$(PROJECT_INCLUDE)/bsp/socal/alt_clkmgr.h: hwlib/include/socal/alt_clkmgr.h $(PROJECT_INCLUDE)/bsp/socal/$(dirstamp)
-	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/socal/alt_clkmgr.h
-PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/socal/alt_clkmgr.h
-
-$(PROJECT_INCLUDE)/bsp/socal/alt_gpio.h: hwlib/include/socal/alt_gpio.h $(PROJECT_INCLUDE)/bsp/socal/$(dirstamp)
-	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/socal/alt_gpio.h
-PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/socal/alt_gpio.h
-
-$(PROJECT_INCLUDE)/bsp/socal/alt_i2c.h: hwlib/include/socal/alt_i2c.h $(PROJECT_INCLUDE)/bsp/socal/$(dirstamp)
-	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/socal/alt_i2c.h
-PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/socal/alt_i2c.h
-
-$(PROJECT_INCLUDE)/bsp/socal/alt_l3.h: hwlib/include/socal/alt_l3.h $(PROJECT_INCLUDE)/bsp/socal/$(dirstamp)
-	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/socal/alt_l3.h
-PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/socal/alt_l3.h
-
-$(PROJECT_INCLUDE)/bsp/socal/alt_rstmgr.h: hwlib/include/socal/alt_rstmgr.h $(PROJECT_INCLUDE)/bsp/socal/$(dirstamp)
-	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/socal/alt_rstmgr.h
-PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/socal/alt_rstmgr.h
-
-$(PROJECT_INCLUDE)/bsp/socal/alt_sdr.h: hwlib/include/socal/alt_sdr.h $(PROJECT_INCLUDE)/bsp/socal/$(dirstamp)
-	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/socal/alt_sdr.h
-PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/socal/alt_sdr.h
-
-$(PROJECT_INCLUDE)/bsp/socal/alt_sysmgr.h: hwlib/include/socal/alt_sysmgr.h $(PROJECT_INCLUDE)/bsp/socal/$(dirstamp)
-	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/socal/alt_sysmgr.h
-PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/socal/alt_sysmgr.h
-
-$(PROJECT_INCLUDE)/bsp/socal/alt_uart.h: hwlib/include/socal/alt_uart.h $(PROJECT_INCLUDE)/bsp/socal/$(dirstamp)
-	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/socal/alt_uart.h
-PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/socal/alt_uart.h
-
-$(PROJECT_INCLUDE)/bsp/socal/hps.h: hwlib/include/socal/hps.h $(PROJECT_INCLUDE)/bsp/socal/$(dirstamp)
-	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/socal/hps.h
-PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/socal/hps.h
-
-$(PROJECT_INCLUDE)/bsp/socal/socal.h: hwlib/include/socal/socal.h $(PROJECT_INCLUDE)/bsp/socal/$(dirstamp)
-	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/socal/socal.h
-PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/socal/socal.h
 
 $(PROJECT_INCLUDE)/libcpu/arm-cp15.h: ../../../libcpu/arm/shared/include/arm-cp15.h $(PROJECT_INCLUDE)/libcpu/$(dirstamp)
 	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/libcpu/arm-cp15.h
@@ -246,8 +197,4 @@ TMPINSTALL_FILES += $(PROJECT_LIB)/linkcmds.altcycv_devkit
 $(PROJECT_LIB)/linkcmds.altcycv_devkit_smp: startup/linkcmds.altcycv_devkit_smp $(PROJECT_LIB)/$(dirstamp)
 	$(INSTALL_DATA) $< $(PROJECT_LIB)/linkcmds.altcycv_devkit_smp
 TMPINSTALL_FILES += $(PROJECT_LIB)/linkcmds.altcycv_devkit_smp
-
-$(PROJECT_INCLUDE)/bsp/i2cdrv.h: include/i2cdrv.h $(PROJECT_INCLUDE)/bsp/$(dirstamp)
-	$(INSTALL_DATA) $< $(PROJECT_INCLUDE)/bsp/i2cdrv.h
-PREINSTALL_FILES += $(PROJECT_INCLUDE)/bsp/i2cdrv.h
 
