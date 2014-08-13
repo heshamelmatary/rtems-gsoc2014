@@ -6,7 +6,10 @@ ENTRY (_start)
  * Global symbols that may be defined externally
  */
 
-bsp_vector_table_size = DEFINED (bsp_vector_table_size) ? bsp_vector_table_size : 8192;
+bsp_start_vector_table_begin = 0x1F00;
+bsp_vector_table_size = DEFINED (bsp_vector_table_size) ? bsp_vector_table_size
+: 8260; 
+/* 8192 for raw vector table, and 17 * 4 for handlers vector. */
 
 bsp_section_xbarrier_align  = DEFINED (bsp_section_xbarrier_align) ? bsp_section_xbarrier_align : 1;
 bsp_section_robarrier_align = DEFINED (bsp_section_robarrier_align) ? bsp_section_robarrier_align : 1;
@@ -21,8 +24,8 @@ bsp_processor_count = DEFINED (bsp_processor_count) ? bsp_processor_count : 1;
 
 MEMORY
   {
-      VECTOR_RAM     (AIW) : ORIGIN = 0x0       , LENGTH = 8192 
-      RAM   : org = 0x00002000, l = 0x00800000
+      VECTOR_RAM     (AIW) : ORIGIN = 0x0       , LENGTH = 8260
+      RAM   : org = 0x00002044, l = 0x00800000
       UNEXPECTED_SECTIONS : ORIGIN = 0xffffffff, LENGTH = 0
   }
 

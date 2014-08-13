@@ -9,14 +9,21 @@
  * returns back to the origianl place where the exceptions happended.
  */
 #define EXCEPTION_SETUP(vector) \
-  l.sw   lo(bsp_start_vector_table_begin)(r0), r13; \
+  l.sw   lo(bsp_start_vector_table_begin)(r0), r3; \
+  l.addi r3, r0, vector; \
+  l.jal  _OR1K_Exception_Process; \
+  l.nop; \
+  l.lwz  r3, lo(bsp_start_vector_table_begin)(r0);\
+  l.rfe;\
+  l.nop ; 
+
+  /*l.sw   lo(bsp_start_vector_table_begin)(r0), r13; \
   l.ori  r13, r0, lo(bsp_start_vector_table_begin + ((vector) * 4)); \
   l.lwz  r13, 0(r13); \
   l.jalr r13; \
   l.lwz  r13, lo(bsp_start_vector_table_begin)(r0); \
   l.rfe ; \
-  l.nop ;
-
+  */
 
 #define EXCEPTION_SETUP1(vector) \
   l.sw   lo(bsp_start_vector_table_begin)(r0), r13; \
@@ -38,6 +45,7 @@
   .extern  bsp_vector_table_size
   .extern  bsp_section_stack_begin 
 
+  .extern exception_frame_save
   .extern _OR1K_Exception_Process
   .extern _OR1K_Exception_default
   .extern rtems_clock_tick
@@ -55,7 +63,8 @@
 
 .org 0x100
 _reset:
-  EXCEPTION_SETUP(1)
+  l.j _start
+  l.nop
 
 .org 0x200
 _buserr:
@@ -71,7 +80,9 @@ _iPageFaule:
 
 .org 0x500
 _timer:
-  EXCEPTION_SETUP1(5)
+  EXCEPTION_SETUP(5)
+
+
   /*l.addi r3,r0,5
   l.jal _OR1K_Exception_Process
   l.rfe
@@ -121,6 +132,8 @@ _undef2:
 .org 0x1900
 _undef3:
   EXCEPTION_SETUP(17)
+
+.org 0x1F00
 
 bsp_start_vector_table_begin:
 
