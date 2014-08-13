@@ -26,6 +26,14 @@
 
 static void or1ksim_clock_at_tick(void)
 {
+  uint32_t TTMR = 0x600fffff;
+  asm volatile (  
+    "l.mtspr r0,%0,0x5000;" /* load TTMR register */
+    ::"r" (TTMR): "memory"
+    );
+    
+  asm volatile ("l.mtspr r0,r0,0x5001;");
+    
    return 0;
 }
 
@@ -52,13 +60,19 @@ static void or1ksim_clock_initialize(void)
 	  "l.addi  %1,r0, 0xfffffff9;"
 	  "l.and   %1,%1,%0" : "=r" (sr) : "r" (mask)
     );
-	  
-	  asm volatile (
-    "l.movhi r15,hi(0x6fffffff);"
-    "l.ori   r15,r15,0xffff;"
-    "l.mtspr r0,r0,0x5001;"
-    "l.mtspr r0,r15,0x5000;"
+    
+  
+   /* Disable ISR */
+   _ISR_Disable( level );
+ 
+  /* Set timer contents to restrt mode */
+  TTMR = 0x600fffff;
+   asm volatile (  
+    "l.mtspr r0,%0,0x5000;" /* load TTMR register */
+    :: "r" (TTMR): "memory"
     );
+    
+    asm volatile ("l.mtspr r0,r0,0x5001;");
     
     asm volatile (
     "l.ori %0,%1,0x7;"
