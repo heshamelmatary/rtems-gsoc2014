@@ -2,6 +2,11 @@
 
 if AMPOLISH3
 $(srcdir)/preinstall.am: Makefile.am
+<<<<<<< HEAD
 	$(AMPOLISH3) $(srcdir)/Makefile.am > $(srcdir)/preinstall.am
 endif
 
+=======
+       $(AMPOLISH3) $(srcdir)/Makefile.am > $(srcdir)/preinstall.am
+endif
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a

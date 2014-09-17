@@ -26,6 +26,8 @@ extern "C" {
 
 #define CPU_CACHE_SUPPORT_PROVIDES_CACHE_SIZE_FUNCTIONS
 
+#define CPU_CACHE_NO_INSTRUCTION_CACHE_SNOOPING
+
 #define CPU_INSTRUCTION_CACHE_ALIGNMENT 64
 
 #define CPU_DATA_CACHE_ALIGNMENT 64
@@ -134,7 +136,10 @@ static inline void _CPU_cache_unfreeze_data(void)
 
 static inline void _CPU_cache_invalidate_entire_instruction(void)
 {
-  __asm__ volatile ("flush");
+  uint32_t cache_reg = leon3_get_cache_control_register();
+
+  cache_reg |= LEON3_REG_CACHE_CTRL_FI;
+  leon3_set_cache_control_register(cache_reg);
 }
 
 static inline void _CPU_cache_invalidate_instruction_range(

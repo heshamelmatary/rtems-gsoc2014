@@ -6,6 +6,16 @@
  * @brief UART support.
  */
 
+<<<<<<< HEAD
+=======
+/*
+ * COPYRIGHT (c) 2014 Hesham ALMatary <heshamelmatary@gmail.com>
+ *
+ * The license and distribution terms for this file may be
+ * found in the file LICENSE in this distribution or at
+ * http://www.rtems.org/license/LICENSE
+ */
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 
 /**
  * @defgroup or1ksim_uart UART Support
@@ -15,6 +25,7 @@
  * @brief Universal Asynchronous Receiver/Transmitter (UART) Support
  */
 
+<<<<<<< HEAD
 /*
  * Copyright (c) 2014 Hesham ALMatary.
  *
@@ -23,6 +34,8 @@
  * http://www.rtems.org/license/LICENSE
  */
 
+=======
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 #ifndef LIBBSP_OR1K_OR1KSIM_UART_H
 #define LIBBSP_OR1K_OR1KSIM_UART_H
 

@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 ##
+=======
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 #
 # @file
 #
@@ -20,7 +23,10 @@ dist_project_lib_DATA = bsp_specs
 
 include_bsp_HEADERS =
 include_HEADERS = include/bsp.h
+<<<<<<< HEAD
 include_HEADERS += include/tm27.h
+=======
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 
 nodist_include_bsp_HEADERS = ../../shared/include/bootcard.h
 
@@ -32,6 +38,10 @@ include_bsp_HEADERS += ../../shared/include/irq-info.h
 include_bsp_HEADERS += ../../shared/include/stackalloc.h
 include_bsp_HEADERS += ../../shared/include/uart-output-char.h
 include_bsp_HEADERS += ../../shared/tod.h
+<<<<<<< HEAD
+=======
+include_bsp_HEADERS += ../../shared/include/tm27.h
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 include_bsp_HEADERS += include/irq.h
 include_bsp_HEADERS += include/uart.h
 include_bsp_HEADERS += include/or1ksim.h
@@ -50,6 +60,10 @@ libbspstart_a_SOURCES = start/start.S
 project_lib_DATA = start.$(OBJEXT)
 
 project_lib_DATA += startup/linkcmds
+<<<<<<< HEAD
+=======
+project_lib_DATA += ../shared/startup/linkcmds.base
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 
 ###############################################################################
 #                  LibBSP                                                     #
@@ -62,8 +76,13 @@ libbsp_a_CPPFLAGS =
 libbsp_a_LIBADD =
 
 # Startup
+<<<<<<< HEAD
 #libbsp_a_SOURCES += startup/bspreset.c
 libbsp_a_SOURCES += startup/bspstart.c
+=======
+libbsp_a_SOURCES += ../../shared/bspstart.c
+libbsp_a_SOURCES += ../../shared/bspreset.c
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 
 # Shared
 libbsp_a_SOURCES += ../../shared/bootcard.c

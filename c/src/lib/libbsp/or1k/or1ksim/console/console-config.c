@@ -11,9 +11,13 @@
  *
  *  The license and distribution terms for this file may be
  *  found in the file LICENSE in this distribution or at
+<<<<<<< HEAD
  *
  *  http://www.rtems.org/license/LICENSE
  *
+=======
+ *  http://www.rtems.org/license/LICENSE
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
  */
 
 #include <rtems/bspIo.h>
@@ -21,7 +25,10 @@
 #include <libchip/serial.h>
 
 #include <bspopts.h>
+<<<<<<< HEAD
 //#include <bsp/irq.h>
+=======
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 #include <bsp/uart.h>
 #include <bsp/or1ksim.h>
 

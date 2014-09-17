@@ -1,11 +1,17 @@
+<<<<<<< HEAD
 ##
+=======
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 #
 # @file
 #
 # @brief Configure script of LibBSP for or1ksim BSP.
 #
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 AC_PREREQ(2.69)
 AC_INIT([rtems-c-src-lib-libbsp-or1k-or1ksim],[_RTEMS_VERSION],[http://www.rtems.org/bugzilla])
 AC_CONFIG_SRCDIR([bsp_specs])

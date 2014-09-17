@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 OUTPUT_ARCH (or1k)
 
 ENTRY (_start)
@@ -26,6 +27,28 @@ MEMORY
   {
       VECTOR_RAM     (AIW) : ORIGIN = 0x0       , LENGTH = 8260
       RAM   : org = 0x00002048, l = 0x1FFDFB8 
+=======
+/**
+ * @file
+ *
+ * @ingroup bsp_linker
+ *
+ * @brief Memory map
+ */
+
+/*
+ * COPYRIGHT (c) 2014 Hesham ALMatary <heshamelmatary@gmail.com>
+ *
+ * The license and distribution terms for this file may be
+ * found in the file LICENSE in this distribution or at
+ * http://www.rtems.org/license/LICENSE
+ */
+
+MEMORY
+  {
+      VECTOR_RAM     (AIW) : ORIGIN = 0x0       , LENGTH = 8260
+      RAM   : org = 0x00002048, l = 0x1FFDFB8
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
       UNEXPECTED_SECTIONS : ORIGIN = 0xffffffff, LENGTH = 0
   }
 
@@ -43,6 +66,7 @@ REGION_ALIAS ("REGION_BSS", RAM);
 REGION_ALIAS ("REGION_WORK", RAM);
 REGION_ALIAS ("REGION_STACK", RAM);
 
+<<<<<<< HEAD
 
     bsp_section_vector_begin = 0;
 
@@ -324,3 +348,9 @@ SECTIONS {
   HeapSize = 0;
 
 }
+=======
+bsp_section_vector_begin = 0;
+bsp_section_stack_begin = 0x1FFDFB8;
+
+INCLUDE linkcmds.base
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a

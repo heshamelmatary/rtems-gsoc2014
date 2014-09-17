@@ -1,3 +1,8 @@
+IMPORTANT!!
+
+This repo is no longer valid as all of the project code has been upstreamed
+to RTEMS. Please use latest RTEMS head instead.
+
 This is the Real-Time Executive for Multiprocessing Systems (RTEMS).
 The version number for this software is indicated in the VERSION file.
 

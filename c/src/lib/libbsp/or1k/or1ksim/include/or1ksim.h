@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 /**
  * @file
  *
@@ -8,6 +11,7 @@
  */
 
 /*
+<<<<<<< HEAD
  * Copyright (c) 2014 Hesham ALMatary.
  *
  *  The license and distribution terms for this file may be
@@ -17,11 +21,23 @@
  *
  */
  
+=======
+ * COPYRIGHT (c) 2014 Hesham ALMatary <heshamelmatary@gmail.com>
+ *
+ * The license and distribution terms for this file may be
+ * found in the file LICENSE in this distribution or at
+ * http://www.rtems.org/license/LICENSE
+ */
+
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 #ifndef LIBBSP_OR1K_OR1KSIM_H
 #define LIBBSP_OR1K_OR1KSIM_H
 
 #include <stdint.h>
+<<<<<<< HEAD
 //#include <bsp/utility.h>
+=======
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 
 /**
  * @defgroup or1ksim_reg Register Definitions
@@ -38,7 +54,11 @@
  *
  * @{
  */
+<<<<<<< HEAD
  
+=======
+
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
  #define OR1KSIM_REG(x)           (*((volatile char *) (x)))
  #define OR1KSIM_BIT(n)           (1 << (n))
 
@@ -65,11 +85,17 @@
 #define OR1KSIM_BSP_UART_REG_MODEM_STATUS    (OR1KSIM_BSP_UART_BASE+6)
 #define OR1KSIM_BSP_UART_REG_SCRATCH         (OR1KSIM_BSP_UART_BASE+7)
 
+<<<<<<< HEAD
 // FIFO Control Register 
+=======
+/* FIFO Control Register */
+#define OR1KSIM_BSP_UART_REG_FIFO_CTRL_TRIGGER_1    (0x00)
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 #define OR1KSIM_BSP_UART_REG_FIFO_CTRL_ENABLE_FIFO  (0x01)
 #define OR1KSIM_BSP_UART_REG_FIFO_CTRL_CLEAR_RCVR   (0x02)
 #define OR1KSIM_BSP_UART_REG_FIFO_CTRL_CLEAR_XMIT   (0x03)
 #define OR1KSIM_BSP_UART_REG_FIFO_CTRL_DMA_SELECT   (0x08)
+<<<<<<< HEAD
 #define OR1KSIM_BSP_UART_REG_FIFO_CTRL_TRIGGER_MASK (0xC0)
 #define OR1KSIM_BSP_UART_REG_FIFO_CTRL_TRIGGER_1    (0x00)
 #define OR1KSIM_BSP_UART_REG_FIFO_CTRL_TRIGGER_4    (0x40)
@@ -83,10 +109,19 @@
 #define OR1KSIM_BSP_UART_REG_LINE_CTRL_EPAR   (0x10)
 #define OR1KSIM_BSP_UART_REG_LINE_CTRL_PARITY (0x08)
 #define OR1KSIM_BSP_UART_REG_LINE_CTRL_STOP   (0x04)
+=======
+#define OR1KSIM_BSP_UART_REG_FIFO_CTRL_TRIGGER_4    (0x40)
+#define OR1KSIM_BSP_UART_REG_FIFO_CTRL_TRIGGER_8    (0x80)
+#define OR1KSIM_BSP_UART_REG_FIFO_CTRL_TRIGGER_14   (0xC0)
+#define OR1KSIM_BSP_UART_REG_FIFO_CTRL_TRIGGER_MASK (0xC0)
+
+/* Line Control Register */
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 #define OR1KSIM_BSP_UART_REG_LINE_CTRL_WLEN5  (0x00)
 #define OR1KSIM_BSP_UART_REG_LINE_CTRL_WLEN6  (0x01)
 #define OR1KSIM_BSP_UART_REG_LINE_CTRL_WLEN7  (0x02)
 #define OR1KSIM_BSP_UART_REG_LINE_CTRL_WLEN8  (0x03)
+<<<<<<< HEAD
 
 // Line Status Register
 #define OR1KSIM_BSP_UART_REG_LINE_STATUS_TEMT (0x40)
@@ -113,13 +148,53 @@
 #define OR1KSIM_BSP_UART_REG_MODEM_STATUS_TERI (0x04)
 #define OR1KSIM_BSP_UART_REG_MODEM_STATUS_DDSR (0x02)
 #define OR1KSIM_BSP_UART_REG_MODEM_STATUS_DCTS (0x01)
+=======
+#define OR1KSIM_BSP_UART_REG_LINE_CTRL_STOP   (0x04)
+#define OR1KSIM_BSP_UART_REG_LINE_CTRL_PARITY (0x08)
+#define OR1KSIM_BSP_UART_REG_LINE_CTRL_EPAR   (0x10)
+#define OR1KSIM_BSP_UART_REG_LINE_CTRL_SPAR   (0x20)
+#define OR1KSIM_BSP_UART_REG_LINE_CTRL_SBC    (0x40)
+#define OR1KSIM_BSP_UART_REG_LINE_CTRL_DLAB   (0x80)
+
+/* Line Status Register */
+#define OR1KSIM_BSP_UART_REG_LINE_STATUS_DR   (0x01)
+#define OR1KSIM_BSP_UART_REG_LINE_STATUS_OE   (0x02)
+#define OR1KSIM_BSP_UART_REG_LINE_STATUS_PE   (0x04)
+#define OR1KSIM_BSP_UART_REG_LINE_STATUS_FE   (0x08)
+#define OR1KSIM_BSP_UART_REG_LINE_STATUS_BI   (0x10)
+#define OR1KSIM_BSP_UART_REG_LINE_STATUS_THRE (0x20)
+#define OR1KSIM_BSP_UART_REG_LINE_STATUS_TEMT (0x40)
+
+/* Modem Control Register */
+#define OR1KSIM_BSP_UART_REG_MODEM_CTRL_DTR  (0x01)
+#define OR1KSIM_BSP_UART_REG_MODEM_CTRL_RTS  (0x02)
+#define OR1KSIM_BSP_UART_REG_MODEM_CTRL_OUT1 (0x04)
+#define OR1KSIM_BSP_UART_REG_MODEM_CTRL_OUT2 (0x08)
+#define OR1KSIM_BSP_UART_REG_MODEM_CTRL_LOOP (0x10)
+
+/* Modem Status Register */
+#define OR1KSIM_BSP_UART_REG_MODEM_STATUS_DCTS (0x01)
+#define OR1KSIM_BSP_UART_REG_MODEM_STATUS_DDSR (0x02)
+#define OR1KSIM_BSP_UART_REG_MODEM_STATUS_TERI (0x04)
+#define OR1KSIM_BSP_UART_REG_MODEM_STATUS_DDCD (0x08)
+#define OR1KSIM_BSP_UART_REG_MODEM_STATUS_CTS  (0x10)
+#define OR1KSIM_BSP_UART_REG_MODEM_STATUS_DSR  (0x20)
+#define OR1KSIM_BSP_UART_REG_MODEM_STATUS_RI   (0x40)
+#define OR1KSIM_BSP_UART_REG_MODEM_STATUS_DCD  (0x80)
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 #define OR1KSIM_BSP_UART_REG_MODEM_STATUS_ANY_DELTA (0x0F)
 
 /** @} */
 
+<<<<<<< HEAD
 
 /** @} */
 
 #endif /* LIBBSP_OR1K_OR1KSIM_H */
 
 
+=======
+/** @} */
+
+#endif /* LIBBSP_OR1K_OR1KSIM_H */
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #include <bsp/linker-symbols.h>
 
 /* The following macro defines the first instructions every exception 
@@ -7,6 +8,23 @@
  * within the vector table. After serving the exception, r13 is loaded
  * back, and pc, sp registers are restored using l.rfe instruction which
  * returns back to the origianl place where the exceptions happended.
+=======
+/*
+ * Copyright (c) 2014 Hesham ALMatary <heshamelmatary@gmail.com>
+ *
+ *  The license and distribution terms for this file may be
+ *  found in the file LICENSE in this distribution or at
+ *  http://www.rtems.org/license/LICENSE
+ */
+#include <bsp/linker-symbols.h>
+
+/* The following macro defines the first instructions every exception
+ * should execute before jumping to its handler function from the
+ * exception vector table. r3 is saved into the stack and loaded with
+ * vector number before jumping to _ISR_Handler. r3 value is restored
+ * back from _ISR_Handler after handling the exception and before
+ * returning from interrupt.
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
  */
 #define EXCEPTION_SETUP(vector) \
   l.nop   ;\
@@ -14,7 +32,11 @@
   l.sw    0(r1), r3; \
   l.addi  r3, r0, vector; \
   l.j     _ISR_Handler; \
+<<<<<<< HEAD
   l.nop 
+=======
+  l.nop
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 
   .extern bsp_start
   .extern boot_card
@@ -24,7 +46,11 @@
   .extern  bsp_start_vector_table_end
   .extern  bsp_start_vector_table_size
   .extern  bsp_vector_table_size
+<<<<<<< HEAD
   .extern  bsp_section_stack_begin 
+=======
+  .extern  bsp_section_stack_begin
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 
   .extern exception_frame_save
   .extern _OR1K_Exception_Process
@@ -49,8 +75,12 @@ _reset:
 
 .org 0x200
 _buserr:
+<<<<<<< HEAD
  l.rfe
  l.nop
+=======
+  EXCEPTION_SETUP(2)
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 
 .org 0x300
 _dPageFault:
@@ -66,8 +96,12 @@ _timer:
 
 .org 0x600
 _unalign:
+<<<<<<< HEAD
   l.rfe
   l.nop
+=======
+  EXCEPTION_SETUP(6)
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 
 .org 0x700
 _undefIns:
@@ -119,7 +153,11 @@ bsp_start_vector_table_begin:
 
   .word 0
   .word _start /* Reset */
+<<<<<<< HEAD
   .word _OR1K_Exception_default /* Bus Error */ 
+=======
+  .word _OR1K_Exception_default /* Bus Error */
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
   .word _OR1K_Exception_default /* Data Page Fault */
   .word _OR1K_Exception_default /* Instruction Page Fault */
   .word _OR1K_Exception_default /* Tick timer */
@@ -142,6 +180,7 @@ bsp_start_vector_table_end:
   .type _start,@function
 
 _start:
+<<<<<<< HEAD
   /* Set SP register to SP mode */
   l.ori  r1,r0,0x1
   l.mtspr r0,r1,17
@@ -161,6 +200,27 @@ _loop_clear_bss:
   l.sfgeu r13,r15
   l.bf    _end_clear_bss
   l.addi  r13,r13,4
+=======
+  /* Set SR register to Supervision mode */
+  l.ori  r1, r0, 0x1
+  l.mtspr r0, r1, 17
+
+  /* load stack and frame pointers */
+  l.movhi r1, hi(bsp_section_stack_begin)
+  l.ori   r1, r1, lo(bsp_section_stack_begin)
+  l.add   r2, r0, r1
+
+/* Clearing .bss */
+  l.movhi r13, hi(bsp_section_bss_begin)
+  l.ori   r13, r13, lo(bsp_section_bss_begin)
+  l.movhi r15, hi(bsp_section_bss_end)
+  l.ori   r15, r15, lo(bsp_section_bss_end)
+
+_loop_clear_bss:
+  l.sfgeu r13, r15
+  l.bf    _end_clear_bss
+  l.addi  r13, r13, 4
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
   l.sw    0(r13), r0
   l.j     _loop_clear_bss
   l.nop
@@ -169,12 +229,21 @@ _end_clear_bss:
   l.j boot_card
   l.nop
 
+<<<<<<< HEAD
 
 /* Temporary code for unhandeled exceptions */
 .section .text
 .align 
+=======
+/* Temporary code for unhandled exceptions */
+.section .text
+.align
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
 .global _unhandled_exception
 
 unhandled_exception:
   l.nop
+<<<<<<< HEAD
 
+=======
+>>>>>>> d13ce7553b86a5b86fb360d8fc530ddd3ceef14a
